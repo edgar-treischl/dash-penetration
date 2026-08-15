@@ -1,4 +1,7 @@
-# Step 1: Setup Complete ✅
+---
+title: "Installation"
+guide-section: "Getting Started"
+---
 
 ## What Was Created
 

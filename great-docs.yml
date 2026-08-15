@@ -82,12 +82,14 @@ dynamic: true
 # GitHub Integration
 # ------------------
 # GitHub repository URL override (e.g. "https://github.com/owner/repo").
-# repo: null
+
+repo: https://github.com/edgar-treischl/dash-penetration
 
 # GitHub link style
 # : widget - (default) a widget showing the stars count
 # : icon - a simple icon
-# github_style: widget
+
+github_style: icon
 
 # Site URL
 # --------
@@ -185,8 +187,8 @@ authors:
   - name: Edgar Treischl
     role: Author
     # affiliation: 
-    email: edgar@treischl.de
-    # github: 
+    email: edgar.treischl@isb.bayern.de
+    github: edgar-treischl
     # orcid: 
     # homepage: 
 
