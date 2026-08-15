@@ -3,7 +3,7 @@ Tests for URL normalization, deduplication, and caching.
 """
 
 import pytest
-from crawler.urls import (
+from dash_penetration.crawler.urls import (
     normalize_url,
     extract_domain,
     is_duplicate,

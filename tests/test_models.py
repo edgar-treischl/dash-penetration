@@ -4,7 +4,7 @@ Tests for crawler data models.
 
 import pytest
 from datetime import datetime
-from crawler.models import (
+from dash_penetration.crawler.models import (
     HTTPMethod,
     DiscoverySource,
     Page,

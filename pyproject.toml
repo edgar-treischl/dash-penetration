@@ -37,7 +37,7 @@ dev = [
 ]
 
 [project.scripts]
-dash-crawler = "main:cli"
+dash-crawler = "dash_penetration.cli:cli"
 
 [build-system]
 requires = ["hatchling"]
