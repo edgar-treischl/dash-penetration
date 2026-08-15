@@ -24,21 +24,17 @@ jobs:
         run: uv venv
 
       - name: Install dependencies
-        run: |
-          . .venv/bin/activate
-          uv pip install -r requirements.txt
+        run: uv sync
 
       - name: Generate API documentation
         run: |
-          . .venv/bin/activate
           mkdir -p docs/generated
           uv run python -c "
           import inspect
           import sys
           sys.path.insert(0, '.')
-          from crawler.models import Page, Endpoint, CrawlResult
-          from crawler.urls import normalize_url, URLCache, is_duplicate
-          from crawler.scope import Scope
+          from dash_penetration.crawler.models import Page, Endpoint, CrawlResult
+          from dash_penetration.crawler.urls import normalize_url, URLCache, is_duplicate
           
           print('Generated documentation stub - API docs will be auto-generated here')
           " > docs/generated/api.md || true

@@ -31,14 +31,10 @@ jobs:
         run: uv venv
 
       - name: Install dependencies
-        run: |
-          . .venv/bin/activate
-          uv pip install -r requirements.txt
+        run: uv sync
 
       - name: Run tests
-        run: |
-          . .venv/bin/activate
-          uv run pytest tests/ -v --cov=crawler --cov=discovery --cov=output --cov-report=xml --cov-report=term-missing
+        run: uv run pytest tests/ -v --cov=dash_penetration.crawler --cov=dash_penetration.discovery --cov=dash_penetration.output --cov-report=xml --cov-report=term-missing
 
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
@@ -49,14 +45,10 @@ jobs:
           fail_ci_if_error: false
 
       - name: Check code formatting
-        run: |
-          . .venv/bin/activate
-          uv run black --check .
+        run: uv run black --check .
 
       - name: Lint with flake8
-        run: |
-          . .venv/bin/activate
-          uv run flake8 . --max-line-length=100 --count --statistics
+        run: uv run flake8 . --max-line-length=100 --count --statistics
 
   security:
     name: Security Checks
