@@ -53,5 +53,3 @@ crawl_results/
 *.json
 cache/
 
-# UV
-uv.lock
