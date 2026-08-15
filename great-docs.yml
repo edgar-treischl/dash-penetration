@@ -48,6 +48,8 @@ parser: numpy
 # : false - static analysis only; better for packages with cyclic aliases
 dynamic: true
 
+navbar_style: sky
+
 # Jupyter Kernel
 # --------------
 # Jupyter kernel to use for executing code cells in .qmd files.
@@ -89,7 +91,7 @@ repo: https://github.com/edgar-treischl/dash-penetration
 # : widget - (default) a widget showing the stars count
 # : icon - a simple icon
 
-github_style: icon
+github_style: widget
 
 # Site URL
 # --------
@@ -214,8 +216,8 @@ authors:
 # live here (language, show_dates, date_format, show_author, show_security)
 # are top-level keys below; setting them under `site` still works and is
 # lifted automatically.
-# site:
-#   theme: flatly            # Quarto theme
+site:
+   theme: simplex            
 #   toc: true                # Show table of contents
 #   toc-depth: 2             # TOC heading depth
 #   html-math-method: katex  # HTML math renderer (e.g. mathjax)

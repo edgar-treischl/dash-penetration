@@ -1,6 +1,8 @@
-# Step 2: Define Data Structures — Complete ✅
+---
+title: "Define Data Structures"
+guide-section: "Getting Started"
+---
 
-## What Was Created
 
 ### crawler/models.py (7,600 lines)
 

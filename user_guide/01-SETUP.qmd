@@ -3,7 +3,7 @@ title: "Installation"
 guide-section: "Getting Started"
 ---
 
-## What Was Created
+
 
 ### Project Structure
 ```

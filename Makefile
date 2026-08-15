@@ -28,7 +28,7 @@ help:
 	@echo ""
 	@echo "Documentation:"
 	@echo "  make docs                 Generate documentation"
-	@echo "  make docs-view            View README and docs"
+	@echo "  make docs-preview         Generate documentation and Preview"
 	@echo ""
 	@echo "Utility:"
 	@echo "  make clean                Remove build artifacts & cache"
@@ -125,29 +125,24 @@ security:
 # Documentation
 # ============================================================================
 
+docs-init:
+	@echo "📚 Generating documentation..."
+	uv run great-docs init
+
 docs:
 	@echo "📚 Generating documentation..."
-	@mkdir -p docs
-	@echo "# Web Crawler Documentation" > docs/index.md
-	@echo "" >> docs/index.md
-	@echo "## Quick Start" >> docs/index.md
-	@echo "See [README.md](../README.md) for project overview." >> docs/index.md
-	@echo "" >> docs/index.md
-	@echo "## Development Plan" >> docs/index.md
-	@echo "See [plan.md](../plan.md) for 11-step development roadmap." >> docs/index.md
-	@echo "" >> docs/index.md
-	@echo "## Architecture" >> docs/index.md
-	@echo "See [.github/copilot-instructions.md](../.github/copilot-instructions.md) for details." >> docs/index.md
-	@echo "✅ Documentation generated in docs/"
+	uv run great-docs build
 
-docs-view:
-	@echo "📖 Documentation files:"
-	@echo ""
-	@echo "  README.md                      - Project overview"
-	@echo "  plan.md                        - 11-step development plan"
-	@echo "  .github/copilot-instructions.md - Architecture guide"
-	@echo "  WORKFLOWS_SETUP.md             - CI/CD configuration"
-	@echo ""
+docs-preview:
+	@echo "📚 Generating documentation..."
+	uv run great-docs build
+	@echo "🚀 Starting documentation preview..."
+	uv run great-docs preview
+
+docs-clean:
+	@echo "🧹 Cleaning Great Docs artifacts..."
+	rm -rf ./great-docs
+
 
 # ============================================================================
 # Running the Crawler

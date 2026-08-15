@@ -1,6 +1,7 @@
-# Step 3: URL Handling & Deduplication — Complete ✅
-
-## What Was Created
+---
+title: "URL Handling & Deduplication"
+guide-section: "Getting Started"
+---
 
 ### crawler/urls.py (190 lines)
 
