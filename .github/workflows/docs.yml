@@ -5,16 +5,19 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
-  build-and-publish:
-    name: "Build & Publish Docs"
+  build:
+    name: "Build Docs"
     runs-on: ubuntu-latest
+
     permissions:
+      contents: read
       pages: write
       id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url || 'N/A' }}
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -48,13 +51,27 @@ jobs:
           echo "" >> docs/index.md
           echo "See [.github/copilot-instructions.md](.github/copilot-instructions.md) for architecture overview." >> docs/index.md
 
-      - name: Publish to GitHub Pages
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        uses: actions/upload-pages-artifact@v3
+      - name: Upload Pages artifact
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v4
         with:
           path: docs/
 
+  deploy:
+    name: "Deploy Docs"
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
       - name: Deploy to GitHub Pages
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
         id: deployment
-        uses: actions/deploy-pages@v3
+        uses: actions/deploy-pages@v4
