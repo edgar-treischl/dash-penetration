@@ -31,9 +31,7 @@ class TestNormalizeURL:
     def test_domain_lowercased(self):
         """Test that domain is lowercased."""
         assert "example.com" in normalize_url("https://EXAMPLE.COM/path")
-        assert "subdomain.example.com" in normalize_url(
-            "https://SUBDOMAIN.EXAMPLE.COM/path"
-        )
+        assert "subdomain.example.com" in normalize_url("https://SUBDOMAIN.EXAMPLE.COM/path")
 
     def test_fragment_removed(self):
         """Test that fragments are removed."""
@@ -50,9 +48,7 @@ class TestNormalizeURL:
 
     def test_trailing_slash_removed_non_root(self):
         """Test that trailing slashes are removed from non-root paths."""
-        assert normalize_url("https://example.com/path/") == (
-            "https://example.com/path"
-        )
+        assert normalize_url("https://example.com/path/") == ("https://example.com/path")
 
     def test_root_path_preserved(self):
         """Test that root path slash is preserved."""
@@ -150,16 +146,11 @@ class TestIsDuplicate:
 
     def test_case_insensitive_duplicates(self):
         """Test that URLs differing only in case are duplicates."""
-        assert (
-            is_duplicate("https://EXAMPLE.COM/path", "https://example.com/path") is True
-        )
+        assert is_duplicate("https://EXAMPLE.COM/path", "https://example.com/path") is True
 
     def test_query_param_order_duplicates(self):
         """Test that URLs with differently ordered params are duplicates."""
-        assert (
-            is_duplicate("https://example.com?a=1&b=2", "https://example.com?b=2&a=1")
-            is True
-        )
+        assert is_duplicate("https://example.com?a=1&b=2", "https://example.com?b=2&a=1") is True
 
     def test_fragment_duplicates(self):
         """Test that URLs differing only in fragment are duplicates."""
@@ -173,35 +164,23 @@ class TestIsDuplicate:
 
     def test_trailing_slash_duplicates(self):
         """Test that URLs differing in trailing slash are duplicates."""
-        assert (
-            is_duplicate("https://example.com/path/", "https://example.com/path")
-            is True
-        )
+        assert is_duplicate("https://example.com/path/", "https://example.com/path") is True
 
     def test_different_schemes_not_duplicates(self):
         """Test that different schemes are not duplicates."""
-        assert (
-            is_duplicate("https://example.com/path", "http://example.com/path") is False
-        )
+        assert is_duplicate("https://example.com/path", "http://example.com/path") is False
 
     def test_different_domains_not_duplicates(self):
         """Test that different domains are not duplicates."""
-        assert (
-            is_duplicate("https://example.com/path", "https://other.com/path") is False
-        )
+        assert is_duplicate("https://example.com/path", "https://other.com/path") is False
 
     def test_different_paths_not_duplicates(self):
         """Test that different paths are not duplicates."""
-        assert (
-            is_duplicate("https://example.com/path1", "https://example.com/path2")
-            is False
-        )
+        assert is_duplicate("https://example.com/path1", "https://example.com/path2") is False
 
     def test_different_query_not_duplicates(self):
         """Test that different query params are not duplicates."""
-        assert (
-            is_duplicate("https://example.com?a=1", "https://example.com?a=2") is False
-        )
+        assert is_duplicate("https://example.com?a=1", "https://example.com?a=2") is False
 
     def test_invalid_urls_return_false(self):
         """Test that invalid URLs return False (not duplicates)."""

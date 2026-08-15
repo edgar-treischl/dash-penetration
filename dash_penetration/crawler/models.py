@@ -231,9 +231,7 @@ class CrawlResult:
     def from_dict(cls, data: Dict[str, Any]) -> "CrawlResult":
         """Create CrawlResult from dictionary."""
         data = data.copy()
-        data["endpoints"] = {
-            k: Endpoint.from_dict(v) for k, v in data.get("endpoints", {}).items()
-        }
+        data["endpoints"] = {k: Endpoint.from_dict(v) for k, v in data.get("endpoints", {}).items()}
         if data.get("start_time"):
             data["start_time"] = datetime.fromisoformat(data["start_time"])
         if data.get("end_time"):

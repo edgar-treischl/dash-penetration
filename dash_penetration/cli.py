@@ -24,9 +24,7 @@ def cli():
     default="console",
     help="Output format",
 )
-@click.option(
-    "--save", type=click.Path(), default=None, help="Save results to JSON file"
-)
+@click.option("--save", type=click.Path(), default=None, help="Save results to JSON file")
 @click.option(
     "--load",
     type=click.Path(exists=True),
@@ -34,9 +32,7 @@ def cli():
     help="Load previous crawl results",
 )
 @click.option("--verbose", is_flag=True, help="Enable debug logging")
-def crawl(
-    url, scope, max_concurrency, rate_limit, timeout, output, save, load, verbose
-):
+def crawl(url, scope, max_concurrency, rate_limit, timeout, output, save, load, verbose):
     """Crawl a target URL and discover endpoints."""
     click.echo(f"Target: {url}")
     click.echo(f"Scope: {scope or 'auto-detect from target'}")
