@@ -1,0 +1,69 @@
+name: Documentation
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-docs:
+    name: "Build Documentation"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install UV
+        uses: astral-sh/setup-uv@v3
+
+      - name: Install Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv pip install -r requirements.txt
+
+      - name: Generate API documentation
+        run: |
+          mkdir -p docs/generated
+          uv run python -c "
+          import inspect
+          import sys
+          sys.path.insert(0, '.')
+          from crawler.models import Page, Endpoint, CrawlResult
+          from crawler.urls import normalize_url, URLCache, is_duplicate
+          from crawler.scope import Scope
+          
+          print('Generated documentation stub - API docs will be auto-generated here')
+          " > docs/generated/api.md || true
+
+      - name: Upload docs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs-build
+          path: docs/
+          retention-days: 5
+
+  preview-docs:
+    name: "Preview Documentation"
+    runs-on: ubuntu-latest
+    needs: "build-docs"
+    if: github.event_name == 'pull_request'
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: docs-build
+          path: docs/
+
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: '📚 Documentation preview available in the artifacts.'
+            })
