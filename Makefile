@@ -61,15 +61,15 @@ dev: install
 
 lint:
 	@echo "🔍 Running flake8 linter..."
-	uv run flake8 crawler/ discovery/ output/ tests/ --max-line-length=100 --count --statistics
+	uv run flake8 dash_penetration/ --count --statistics
 
-format-check:
+black:
 	@echo "📋 Checking Black formatting..."
-	uv run black --check crawler/ discovery/ output/ tests/ main.py
+	uv run black --check .
 
-format:
+black-format:
 	@echo "🎨 Formatting code with Black..."
-	uv run black crawler/ discovery/ output/ tests/ main.py
+	uv run black .
 	@echo "✅ Code formatted"
 
 type-check:
