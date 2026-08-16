@@ -13,21 +13,24 @@ def normalize_url(url: str) -> str:
     """
     Normalize a URL for consistent comparison and deduplication.
 
-    Performs the following normalizations:
-    - Lowercase scheme and domain
-    - Default to https if no scheme
-    - Remove fragment (#)
-    - Sort query parameters
-    - Remove trailing slash from path (except for root)
+    Performs the following normalizations: lowercase scheme and domain, default to
+    https if no scheme, remove fragment (#), sort query parameters, and remove
+    trailing slash from path (except for root).
 
-    Args:
-        url: URL to normalize
+    Parameters
+    ----------
+    url : str
+        URL to normalize
 
-    Returns:
+    Returns
+    -------
+    str
         Normalized URL string
 
-    Raises:
-        ValueError: If URL is invalid or empty
+    Raises
+    ------
+    ValueError
+        If URL is invalid or empty
     """
     if not url or not isinstance(url, str):
         raise ValueError("URL must be a non-empty string")
@@ -73,14 +76,20 @@ def extract_domain(url: str) -> str:
     """
     Extract the root domain from a URL.
 
-    Args:
-        url: URL to extract domain from
+    Parameters
+    ----------
+    url : str
+        URL to extract domain from
 
-    Returns:
+    Returns
+    -------
+    str
         Domain string (e.g., "example.com")
 
-    Raises:
-        ValueError: If URL is invalid
+    Raises
+    ------
+    ValueError
+        If URL is invalid
     """
     if not url or not isinstance(url, str):
         raise ValueError("URL must be a non-empty string")
@@ -106,11 +115,16 @@ def is_duplicate(url1: str, url2: str) -> bool:
     """
     Check if two URLs are duplicates after normalization.
 
-    Args:
-        url1: First URL
-        url2: Second URL
+    Parameters
+    ----------
+    url1 : str
+        First URL
+    url2 : str
+        Second URL
 
-    Returns:
+    Returns
+    -------
+    bool
         True if URLs are duplicates, False otherwise
     """
     try:
@@ -126,14 +140,20 @@ def extract_path_and_query(url: str) -> Tuple[str, str]:
     """
     Extract path and query string from a URL.
 
-    Args:
-        url: URL to extract from
+    Parameters
+    ----------
+    url : str
+        URL to extract from
 
-    Returns:
+    Returns
+    -------
+    tuple of (str, str)
         Tuple of (path, query_string)
 
-    Raises:
-        ValueError: If URL is invalid
+    Raises
+    ------
+    ValueError
+        If URL is invalid
     """
     normalized = normalize_url(url)
     parsed = urlparse(normalized)
@@ -144,10 +164,8 @@ class URLCache:
     """
     Cache for tracking seen URLs and detecting duplicates.
 
-    Efficiently stores URLs and checks for duplicates by:
-    - Normalizing URLs before storage
-    - Using a set for O(1) lookups
-    - Maintaining count of each unique URL
+    Efficiently stores URLs and checks for duplicates by normalizing URLs before
+    storage, using a set for O(1) lookups, and maintaining count of each unique URL.
     """
 
     def __init__(self):
@@ -159,14 +177,20 @@ class URLCache:
         """
         Add a URL to cache if not already seen.
 
-        Args:
-            url: URL to add
+        Parameters
+        ----------
+        url : str
+            URL to add
 
-        Returns:
+        Returns
+        -------
+        bool
             True if URL was new (not in cache), False if duplicate
 
-        Raises:
-            ValueError: If URL is invalid
+        Raises
+        ------
+        ValueError
+            If URL is invalid
         """
         normalized = normalize_url(url)
 
@@ -182,14 +206,20 @@ class URLCache:
         """
         Check if URL has been seen before.
 
-        Args:
-            url: URL to check
+        Parameters
+        ----------
+        url : str
+            URL to check
 
-        Returns:
+        Returns
+        -------
+        bool
             True if URL is in cache, False otherwise
 
-        Raises:
-            ValueError: If URL is invalid
+        Raises
+        ------
+        ValueError
+            If URL is invalid
         """
         normalized = normalize_url(url)
         return normalized in self._seen
@@ -198,14 +228,20 @@ class URLCache:
         """
         Get the number of times a URL has been added to cache.
 
-        Args:
-            url: URL to check
+        Parameters
+        ----------
+        url : str
+            URL to check
 
-        Returns:
+        Returns
+        -------
+        int
             Count of how many times URL was added (0 if not seen)
 
-        Raises:
-            ValueError: If URL is invalid
+        Raises
+        ------
+        ValueError
+            If URL is invalid
         """
         normalized = normalize_url(url)
         return self._url_count.get(normalized, 0)
@@ -214,7 +250,9 @@ class URLCache:
         """
         Get all unique URLs seen.
 
-        Returns:
+        Returns
+        -------
+        list of str
             List of all normalized URLs in cache
         """
         return sorted(list(self._seen))
@@ -223,7 +261,9 @@ class URLCache:
         """
         Get the number of unique URLs in cache.
 
-        Returns:
+        Returns
+        -------
+        int
             Count of unique URLs
         """
         return len(self._seen)
@@ -237,14 +277,20 @@ class URLCache:
         """
         Support 'in' operator to check if URL is in cache.
 
-        Args:
-            url: URL to check
+        Parameters
+        ----------
+        url : str
+            URL to check
 
-        Returns:
+        Returns
+        -------
+        bool
             True if URL is in cache, False otherwise
 
-        Raises:
-            ValueError: If URL is invalid
+        Raises
+        ------
+        ValueError
+            If URL is invalid
         """
         return self.has_seen(url)
 
