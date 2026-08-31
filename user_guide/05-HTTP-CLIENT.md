@@ -1,10 +1,13 @@
-# Step 5: HTTP Client
+
+---
+title: "Step 5: HTTP Client"
+guide-section: "Getting Started"
+---
 
 **Status:** ✅ Complete  
 **Module:** `dash_penetration.crawler.http`  
 **Tests:** 31 comprehensive tests  
 
----
 
 ## Overview
 

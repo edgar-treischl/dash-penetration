@@ -1,10 +1,10 @@
-# Step 6: HTML Parser
-
-**Status:** ✅ Complete  
-**Module:** `dash_penetration.crawler.parser`  
-**Tests:** 42 comprehensive tests  
 
 ---
+title: "Step 6: HTML Parser"
+guide-section: "Getting Started"
+---
+
+
 
 ## Overview
 

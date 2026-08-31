@@ -1,10 +1,12 @@
-# Step 4: Scope Validation
+
+---
+title: "Step 4: Scope Validation"
+guide-section: "Getting Started"
+---
 
 **Status:** ✅ Complete  
 **Module:** `dash_penetration.crawler.scope`  
 **Tests:** 42 comprehensive tests  
-
----
 
 ## Overview
 
