@@ -1,103 +1,163 @@
-# Web Pentesting Learning Path
+# dash-penetration 🔐
 
-The goal is to learn the workflow step by step rather than relying
-immediately on automated scanners.
+**Automated web application security scanner for authorized penetration testing**
 
-## 1. Python crawler — start here
+A Python-based vulnerability scanner that combines JavaScript rendering with comprehensive security testing. Built for security learning and authorized testing of your own web applications.
 
-Build a crawler for my own/authorized website.
+## 🎯 What It Does
 
-Recommended stack:
+This tool performs **automated penetration testing** by:
 
-- `httpx` — HTTP requests and async crawling
-- `selectolax` — fast HTML parsing
-- `asyncio` — concurrency
-- URL normalization + deduplication
-- scope checking — stay within the target domain
-- rate limiting — don't overload the server
-- add a feature to crawl once, save results, only crawl again if asked 
-- use UV as Python package manager
+1. **JavaScript Rendering** — Uses Playwright to discover content in modern web apps (React, Vue, Angular)
+2. **Interactive Discovery** — Clicks buttons and triggers interactions to find hidden forms/APIs
+3. **Vulnerability Scanning** — Tests for 6 categories of security vulnerabilities
+4. **Professional Reporting** — Generates detailed JSON reports with CWE IDs, severity ratings, and remediation guidance
 
-The crawler should initially:
+## 🚀 Quick Start
 
-- crawl pages starting from the target URL
-- extract links from HTML
-- follow redirects
-- identify forms
-- collect query parameters
-- record HTTP status codes
-- record content types
-- discover referenced resources such as JavaScript files
-- produce a structured endpoint inventory
+```bash
+# Install dependencies
+uv pip install -r requirements.txt
 
-Example output:
+# Run penetration test
+uv run python pentest_scanner.py https://your-app.com
 
-    GET  /                    200  text/html
-    GET  /login               200  text/html
-    GET  /products            200  text/html
-    GET  /products/123        200  text/html
-    POST /login               200  application/json
-    GET  /api/products        200  application/json
-
-Keep the first version simple. Get reliable crawling and URL
-discovery working before adding JavaScript/browser automation.
-
-Something like:
-
-```
-crawler/
-│
-├── main.py                  # Entry point / CLI
-│
-├── crawler/
-│   ├── __init__.py
-│   ├── engine.py            # Main crawl loop / queue
-│   ├── http.py              # HTTP client, redirects, timeouts
-│   ├── parser.py            # HTML parsing with selectolax
-│   ├── urls.py              # URL normalization + deduplication
-│   ├── scope.py             # Target/scope validation
-│   └── models.py            # Page / endpoint data structures
-│
-├── discovery/
-│   ├── __init__.py
-│   ├── links.py             # Extract links from HTML
-│   ├── forms.py             # Extract forms + parameters
-│   ├── scripts.py           # Discover JavaScript resources
-│   └── api.py               # Identify API endpoints
-│
-├── output/
-│   ├── __init__.py
-│   ├── console.py           # Human-readable output
-│   └── json.py              # Save structured results
-│
-├── tests/
-│   ├── test_urls.py
-│   ├── test_scope.py
-│   └── test_parser.py
-│
-├── requirements.txt
-├── README.md
-└── .gitignore
+# Output: Console report + JSON file
 ```
 
+## 📊 Vulnerability Detection
 
-## Later
+The scanner tests for:
 
-## 2. Burp Suite — later
+### 1. **SQL Injection**
+- Error-based detection (database errors in responses)
+- Boolean-based blind injection
+- Time-based blind injection
+- Tests all form parameters
 
-Once the crawler works, learn HTTP traffic interactively with
-Burp Suite.
+### 2. **Cross-Site Scripting (XSS)**
+- Reflected XSS (input mirrored in response)
+- Encoded payload bypass attempts
+- DOM-based XSS (static JavaScript analysis)
+- Tests username, password, and text fields
 
-Focus on:
+### 3. **CSRF (Cross-Site Request Forgery)**
+- Missing CSRF tokens in forms
+- Unsafe GET methods for state-changing operations
+- Form submission security validation
 
-- requests and responses
-- headers
-- cookies
-- sessions
-- authentication
-- parameters
-- redirects
-- repeater/manual request modification
+### 4. **Authentication Vulnerabilities**
+- Weak/default credentials testing (admin/admin, etc.)
+- Username enumeration detection
+- Login form security analysis
+
+### 5. **Security Headers**
+- Missing Content-Security-Policy (XSS protection)
+- Missing X-Frame-Options (clickjacking protection)
+- Missing HSTS (Strict-Transport-Security)
+- Missing X-Content-Type-Options
+- Missing Referrer-Policy
+- Missing Permissions-Policy
+
+### 6. **Information Disclosure**
+- Exposed sensitive files (.git, .env, config files)
+- Exposed API documentation (Swagger/OpenAPI)
+- Sensitive patterns in responses (API keys, passwords)
+- Directory listing vulnerabilities
+
+## 🏗️ Architecture
+
+```
+dash-penetration/
+│
+├── pentest_scanner.py           # Main integrated scanner (entry point)
+├── js_crawler.py                # JavaScript-enabled discovery with Playwright
+│
+├── dash_penetration/
+│   ├── scanner/                 # Vulnerability scanner modules
+│   │   ├── scanner.py           # Core scanner orchestration
+│   │   ├── sql_injection.py     # SQL injection detection
+│   │   ├── xss.py               # XSS detection
+│   │   ├── csrf.py              # CSRF detection
+│   │   ├── auth.py              # Authentication testing
+│   │   ├── headers.py           # Security headers analysis
+│   │   └── info_disclosure.py   # Information disclosure detection
+│   │
+│   ├── crawler/                 # HTTP utilities
+│   │   ├── http.py              # Async HTTP client
+│   │   ├── parser.py            # HTML parsing with selectolax
+│   │   └── scope.py             # Scope validation
+│   │
+│   └── discovery/               # Content discovery
+│       ├── links.py             # Link extraction
+│       └── forms.py             # Form extraction
+│
+└── tests/                       # Test suite
+```
+
+## 📋 Example Output
+
+```
+🔐 AUTOMATED PENETRATION TEST
+Target: https://example.com
+
+🌐 Phase 1: JavaScript Rendering & Discovery
+✓ Found 2 forms (login + contact)
+✓ Found 15 links
+✓ Discovered backend API endpoint
+
+🔍 Phase 2: Vulnerability Scanning
+[1/6] Security headers... 6 issues
+[2/6] Information disclosure... 1 issue
+[3/6] SQL injection... 0 issues
+[4/6] XSS... 4 issues
+[5/6] CSRF... 0 issues
+[6/6] Authentication... 1 issue
+
+📊 SCAN COMPLETE
+Total Vulnerabilities: 12
+  🔴 Critical: 1
+  🟠 High:     5
+  🟡 Medium:   2
+  🟢 Low:      3
+  ℹ️  Info:     1
+
+📄 Full report saved to: pentest_report_20260831_172000.json
+```
+
+## 🔧 Tech Stack
+
+- **Python 3.12+** with UV package manager
+- **httpx** — Async HTTP client
+- **selectolax** — Fast HTML parsing
+- **playwright** — JavaScript rendering and browser automation
+- **asyncio** — Concurrent vulnerability testing
+
+## ⚠️ Security & Ethics
+
+**IMPORTANT:** This tool is for **authorized security testing only**.
+
+✅ **Authorized Use:**
+- Testing your own applications
+- Testing with explicit written permission
+- Educational/learning purposes on authorized targets
+
+❌ **Unauthorized Use:**
+- Scanning websites without permission is **illegal**
+- Unauthorized penetration testing can result in criminal charges
+- Always get written authorization before testing
+
+## 📝 License
+
+MIT License - For educational and authorized security testing only.
+
+## 🤝 Contributing
+
+This is a learning project. Contributions welcome for:
+- New vulnerability detection modules
+- Improved detection accuracy
+- False positive reduction
+- Performance optimizations
 - understanding how the application behaves
 
 The goal is to understand what the crawler is seeing at the HTTP

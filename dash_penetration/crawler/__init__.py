@@ -1,4 +1,7 @@
-from .urls import normalize_url, extract_domain, is_duplicate, extract_path_and_query, URLCache
+"""
+Crawler module for HTTP client, HTML parsing, and scope validation.
+"""
+
 from .scope import Scope
 from .http import (
     HTTPClient,
@@ -11,15 +14,8 @@ from .http import (
     HTTPStatusError,
 )
 from .parser import HTMLParser, Form, FormInput, ScriptReference
-from .engine import CrawlEngine, RateLimiter
-from .models import Page, Endpoint, CrawlResult, DiscoverySource
 
 __all__ = [
-    "normalize_url",
-    "extract_domain",
-    "is_duplicate",
-    "extract_path_and_query",
-    "URLCache",
     "Scope",
     "HTTPClient",
     "HTTPResponse",
@@ -33,10 +29,4 @@ __all__ = [
     "Form",
     "FormInput",
     "ScriptReference",
-    "CrawlEngine",
-    "RateLimiter",
-    "Page",
-    "Endpoint",
-    "CrawlResult",
-    "DiscoverySource",
 ]

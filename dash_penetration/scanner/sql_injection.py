@@ -22,9 +22,9 @@ class SQLInjectionScanner:
     # SQL injection payloads
     ERROR_BASED_PAYLOADS = [
         "'",
-        "\"",
+        '"',
         "' OR '1'='1",
-        "\" OR \"1\"=\"1",
+        '" OR "1"="1',
         "' OR '1'='1' --",
         "' OR '1'='1' /*",
         "admin' --",
@@ -134,9 +134,7 @@ class SQLInjectionScanner:
                     test_url = f"{url}?{param_name}={payload}"
                     response = await self.http_client.get(test_url)
                 else:
-                    response = await self.http_client.post(
-                        url, data={param_name: payload}
-                    )
+                    response = await self.http_client.post(url, data={param_name: payload})
 
                 # Check for SQL errors in response
                 if self._detect_sql_error(response.text()):

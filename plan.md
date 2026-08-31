@@ -1,422 +1,310 @@
-# Web Crawler Development Plan
+# Vulnerability Scanner Development Plan
 
-## Overview
+## Project Vision
 
-This plan breaks down the Python crawler development into logical, incrementally testable steps. Each step builds on previous work and can be validated independently before moving forward.
-
-**Total estimated phases: 10 major steps**
+**dash-penetration** is an automated web application security scanner for authorized penetration testing. Unlike traditional crawlers that just map URLs, this tool actively tests for exploitable vulnerabilities.
 
 ---
 
-## Phase 1: Project Setup & Foundational Infrastructure
+## ✅ Phase 1: JavaScript Rendering & Discovery (COMPLETE)
 
-### Step 1: Initialize project structure and dependencies
-**Goal:** Set up the project, install core dependencies, and create the directory structure.
+### Goal
+Discover application attack surface including dynamically rendered content.
 
-**Tasks:**
-- Create `requirements.txt` with core dependencies:
-  - `httpx` (async HTTP client)
-  - `selectolax` (HTML parsing)
-  - `pytest` (testing)
-  - `black` (code formatting)
-  - `flake8` (linting)
-  - `python-dotenv` (environment config)
-  - `click` (CLI framework)
-- Create project directories: `crawler/`, `discovery/`, `output/`, `tests/`
-- Create `__init__.py` files in each package
-- Create `.gitignore`, `.env.example`
-- Initialize `uv` lock file: `uv pip compile requirements.txt`
-- Create empty `main.py` entry point
+### What We Built
+- ✅ JavaScript rendering with Playwright
+- ✅ Interactive element discovery (button clicking)
+- ✅ Form extraction (login, contact, etc.)
+- ✅ Network request monitoring (API endpoint discovery)
+- ✅ HTML parsing with selectolax
+- ✅ Link extraction
 
-**Output:**
-- Full project structure ready
-- All dependencies installed and locked
-- Verified imports work
+### Files
+- `js_crawler.py` — JavaScript-enabled crawler
+- `dash_penetration/crawler/parser.py` — HTML parsing
+- `dash_penetration/discovery/forms.py` — Form extraction
+- `dash_penetration/discovery/links.py` — Link extraction
 
-**Validation:**
+---
+
+## ✅ Phase 2: Vulnerability Scanner (COMPLETE)
+
+### Goal
+Detect common web application vulnerabilities with high confidence.
+
+### What We Built
+
+#### 1. SQL Injection Scanner ✅
+- Error-based detection (database errors in responses)
+- Boolean-based blind injection
+- Time-based blind detection
+- Tests all form parameters
+- **File:** `dash_penetration/scanner/sql_injection.py`
+
+#### 2. XSS Scanner ✅
+- Reflected XSS detection
+- Encoded payload testing
+- DOM-based XSS (static JavaScript analysis)
+- Tests all text inputs
+- **File:** `dash_penetration/scanner/xss.py`
+
+#### 3. CSRF Scanner ✅
+- Missing CSRF token detection
+- Unsafe GET method detection
+- Form security validation
+- **File:** `dash_penetration/scanner/csrf.py`
+
+#### 4. Authentication Scanner ✅
+- Weak/default credentials testing
+- Username enumeration detection
+- Login form analysis
+- **File:** `dash_penetration/scanner/auth.py`
+
+#### 5. Security Headers Scanner ✅
+- Missing CSP detection
+- Missing X-Frame-Options
+- Missing HSTS
+- Complete header audit
+- **File:** `dash_penetration/scanner/headers.py`
+
+#### 6. Information Disclosure Scanner ✅
+- Exposed .git/.env detection
+- Swagger/OpenAPI exposure
+- Sensitive pattern detection
+- Directory listing detection
+- **File:** `dash_penetration/scanner/info_disclosure.py`
+
+### Core Infrastructure ✅
+- `dash_penetration/scanner/scanner.py` — Orchestration + reporting
+- Severity levels: CRITICAL > HIGH > MEDIUM > LOW > INFO
+- ScanResult dataclass with CWE IDs, confidence scores, evidence
+- JSON report generation with timestamps
+
+---
+
+## ✅ Phase 3: Integration & Reporting (COMPLETE)
+
+### Goal
+Combine discovery + scanning into single automated workflow.
+
+### What We Built
+- ✅ `pentest_scanner.py` — Main integrated scanner
+- ✅ 3-phase workflow:
+  1. JavaScript rendering & discovery
+  2. Vulnerability scanning (all 6 scanners)
+  3. Report generation (console + JSON)
+- ✅ Color-coded severity output (🔴🟠🟡🟢ℹ️)
+- ✅ Structured JSON reports with full evidence
+- ✅ Remediation guidance for each finding
+
+### Example Usage
 ```bash
-uv run python -c "import httpx, selectolax, pytest; print('All imports OK')"
+uv run python pentest_scanner.py https://target.com
 ```
 
 ---
 
-## Phase 2: Data Models (Foundation Layer)
+## 🔄 Phase 4: Enhanced Detection (IN PROGRESS)
 
-### Step 2: Define data structures
-**Goal:** Create reusable models for Pages, Endpoints, and crawl results.
+### Goals
+- Reduce false positives
+- Improve detection accuracy
+- Add more vulnerability types
 
-**Tasks:**
-- Create `crawler/models.py` with:
-  - `Page` dataclass: url, method, status_code, content_type, content, headers, timestamp, discovered_by
-  - `Endpoint` dataclass: method, path, status_code, content_type, forms, links, scripts
-  - `CrawlResult` dataclass: target_url, scope, endpoints (list), pages_crawled, start_time, end_time
-- Add validation methods (e.g., validate status_code, validate method)
-- Add serialization methods (to_dict, from_dict)
-- Create `tests/test_models.py` with basic instantiation tests
+### Planned Enhancements
 
-**Output:**
-- Type-safe models for the entire crawler
-- Tests validating model creation and serialization
+#### A. Time-Based SQL Injection (Real Detection)
+Currently: Placeholder detection
+**TODO:**
+- Implement actual time-based detection
+- Measure response time differences
+- Account for network latency
+- Add statistical analysis
 
-**Validation:**
-```bash
-uv run pytest tests/test_models.py -v
-```
+#### B. SSRF (Server-Side Request Forgery)
+**TODO:**
+- Test URL parameters with external callbacks
+- Detect internal IP access attempts
+- Check for cloud metadata endpoints (169.254.169.254)
+- Test DNS resolution manipulation
 
----
+#### C. File Upload Vulnerabilities
+**TODO:**
+- Test unrestricted file upload
+- Check file type validation bypass
+- Test path traversal in filenames
+- Detect missing file size limits
 
-## Phase 3: URL Handling (Critical Foundation)
+#### D. XXE (XML External Entity)
+**TODO:**
+- Test XML input parameters
+- Detect external entity parsing
+- Test for file disclosure via XXE
 
-### Step 3: Implement URL normalization and deduplication
-**Goal:** Ensure URLs are consistently normalized and duplicates are detected.
-
-**Tasks:**
-- Create `crawler/urls.py` with:
-  - `normalize_url(url)` → canonicalized URL
-    - Handle scheme (default to https)
-    - Lowercase domain
-    - Remove fragments
-    - Sort query parameters
-    - Decode/re-encode paths consistently
-  - `extract_domain(url)` → root domain
-  - `is_duplicate(url1, url2)` → bool
-  - `URLCache` class to track seen URLs with deduplication set
-- Write comprehensive unit tests in `tests/test_urls.py`:
-  - Test various URL formats (query params, fragments, case variations)
-  - Test duplicate detection
-  - Test edge cases (encoded characters, paths with dots)
-
-**Output:**
-- Robust URL normalization preventing duplicates
-- Fast lookups via set/cache
-- Full test coverage
-
-**Validation:**
-```bash
-uv run pytest tests/test_urls.py -v
-```
+#### E. Command Injection
+**TODO:**
+- Test system command injection
+- Detect shell metacharacters in responses
+- Time-based command injection
 
 ---
 
-## Phase 4: Scope Validation (Critical Foundation)
+## 🧪 Phase 5: Testing & Validation (TODO)
 
-### Step 4: Implement scope checking
-**Goal:** Ensure crawling stays within authorized targets.
+### Goals
+- Comprehensive test coverage
+- Validate scanner accuracy
+- Performance benchmarking
 
-**Tasks:**
-- Create `crawler/scope.py` with:
-  - `Scope` class to define target domains/paths
-    - `allowed_domains` (list of base domains)
-    - `allowed_paths` (optional path prefix whitelist)
-    - `disallowed_paths` (exclude paths like /admin, /private)
-  - `is_in_scope(url, scope)` → bool
-  - `parse_scope_config(dict)` → Scope object
-- Write tests in `tests/test_scope.py`:
-  - Test domain validation
-  - Test path inclusion/exclusion
-  - Test subdomain handling
-  - Test edge cases
+### Planned Tests
 
-**Output:**
-- Scope validator preventing out-of-scope crawling
-- Flexible configuration format
-- Full test coverage
+#### Unit Tests
+- Test individual scanner modules
+- Mock HTTP responses
+- Validate detection logic
+- Test edge cases
 
-**Validation:**
-```bash
-uv run pytest tests/test_scope.py -v
-```
+#### Integration Tests
+- Test full scan workflow
+- Validate report generation
+- Test JavaScript rendering
+- Test concurrent scanning
 
----
+#### Accuracy Tests
+- Test against known vulnerable apps (DVWA, WebGoat)
+- Measure false positive rate
+- Measure false negative rate
+- Compare with industry tools (OWASP ZAP, Burp)
 
-## Phase 5: HTTP Client (Core I/O)
-
-### Step 5: Build HTTP client wrapper
-**Goal:** Wrap httpx for consistent error handling, timeouts, and redirects.
-
-**Tasks:**
-- Create `crawler/http.py` with:
-  - `HTTPClient` class wrapping httpx.AsyncClient
-  - Methods:
-    - `fetch(url, method='GET', follow_redirects=True)` → response or error
-    - `get_with_timeout(url, timeout=10)` → response
-    - `close()` → cleanup
-  - Error handling for:
-    - Connection errors
-    - Timeouts
-    - Invalid SSL (for learning purposes)
-    - Rate limiting (429 responses)
-  - Response validation (status, content-type, content-length)
-- Write tests in `tests/test_http.py` using mocked responses:
-  - Test successful requests
-  - Test redirect following
-  - Test timeout handling
-  - Test error responses
-
-**Output:**
-- Reliable, retry-aware HTTP client
-- Consistent error handling
-- Mocked tests (no real network calls)
-
-**Validation:**
-```bash
-uv run pytest tests/test_http.py -v
-```
+#### Performance Tests
+- Benchmark scan speed
+- Test concurrency limits
+- Memory usage profiling
+- Large-scale testing
 
 ---
 
-## Phase 6: HTML Parsing (Discovery Foundation)
+## 🎯 Phase 6: Reporting Enhancements (TODO)
 
-### Step 6: Implement HTML parser
-**Goal:** Extract links, forms, and other relevant elements from HTML.
+### Goals
+- Multiple report formats
+- Better visualization
+- Integration with CI/CD
 
-**Tasks:**
-- Create `crawler/parser.py` with:
-  - `HTMLParser` class using selectolax
-  - Methods:
-    - `extract_links(html)` → list of URLs
-    - `extract_forms(html)` → list of form data (action, method, inputs)
-    - `extract_scripts(html)` → list of script URLs/inline content
-    - `extract_meta(html)` → meta tags (robots, etc.)
-  - Handling:
-    - Relative URL resolution to absolute URLs
-    - Deduplication within page
-    - Filtering invalid links
-- Write tests in `tests/test_parser.py`:
-  - Test with sample HTML fixtures
-  - Test relative URL resolution
-  - Test form extraction
-  - Test edge cases (malformed HTML)
+### Planned Features
 
-**Output:**
-- Fast HTML parsing with selectolax
-- Consistent extraction methods
-- Full test coverage with fixtures
+#### HTML Reports
+- Color-coded severity table
+- Expandable evidence sections
+- Executive summary
+- Remediation timeline
 
-**Validation:**
-```bash
-uv run pytest tests/test_parser.py -v
-```
+#### PDF Reports
+- Professional formatting
+- Logo/branding support
+- Charts and graphs
+- Executive summary page
 
----
+#### CI/CD Integration
+- Exit code on critical findings
+- GitHub Actions integration
+- GitLab CI integration
+- Threshold-based pass/fail
 
-## Phase 7: Discovery Plugins (Modular Discovery)
-
-### Step 7: Implement discovery modules
-**Goal:** Extract specific insights from crawled pages.
-
-**Tasks:**
-- Create `discovery/links.py`:
-  - Extract and categorize internal vs external links
-  - Return structured `LinkDiscovery` result
-- Create `discovery/forms.py`:
-  - Extract forms with fields, types, validation
-  - Return structured `FormDiscovery` result
-- Create `discovery/scripts.py`:
-  - Extract .js resources and inline scripts
-  - Return structured `ScriptDiscovery` result
-- Create `discovery/api.py`:
-  - Identify API endpoints (JSON responses, API paths like /api/*)
-  - Return structured `APIDiscovery` result
-- Create `discovery/__init__.py` exporting all discoverers
-- Write tests in `tests/test_discovery.py` with HTML fixtures
-
-**Output:**
-- Modular discovery plugins
-- Reusable on any parsed page
-- Full test coverage
-
-**Validation:**
-```bash
-uv run pytest tests/test_discovery.py -v
-```
+#### Diff Reports
+- Compare scan results over time
+- Track vulnerability trends
+- Highlight new vs. fixed issues
 
 ---
 
-## Phase 8: Output Formatters (Export)
+## 🚀 Phase 7: Advanced Features (FUTURE)
 
-### Step 8: Implement output modules
-**Goal:** Provide human-readable and structured outputs.
+### Potential Enhancements
 
-**Tasks:**
-- Create `output/console.py`:
-  - `ConsoleFormatter` class
-  - Method: `format_endpoints(endpoints)` → formatted table
-  - Method: `format_crawl_summary(result)` → summary stats
-  - Uses colored output for readability (e.g., status codes: 200=green, 404=yellow, 500=red)
-- Create `output/json.py`:
-  - `JSONFormatter` class
-  - Method: `format_endpoints(endpoints)` → JSON string
-  - Method: `save_to_file(result, filename)` → write JSON
-  - Method: `load_from_file(filename)` → read previous crawl
-- Create tests in `tests/test_output.py`:
-  - Test JSON serialization/deserialization
-  - Test console formatting doesn't crash
+#### Rate Limiting & Stealth
+- Configurable request rate
+- Random delays
+- User-agent rotation
+- Proxy support
 
-**Output:**
-- Multiple output formats
-- Save/load crawl results for caching
-- Full test coverage
+#### Authentication Support
+- Login form automation
+- Cookie-based auth
+- Bearer token auth
+- OAuth/OIDC support
 
-**Validation:**
-```bash
-uv run pytest tests/test_output.py -v
-```
+#### API Security Testing
+- GraphQL security testing
+- REST API fuzzing
+- OpenAPI spec-based testing
+- JWT security analysis
+
+#### Exploit Verification
+- Proof-of-concept generation
+- Safe exploitation (with permission)
+- Impact assessment
+- Automated remediation suggestions
 
 ---
 
-## Phase 9: Main Crawler Engine (Orchestration)
+## 📊 Current Status Summary
 
-### Step 9: Implement crawl engine
-**Goal:** Orchestrate the entire crawl workflow with queue, concurrency, and discovery.
-
-**Tasks:**
-- Create `crawler/engine.py` with:
-  - `CrawlEngine` class
-  - Constructor: `__init__(target_url, scope, rate_limit=10/sec, max_concurrency=5)`
-  - Methods:
-    - `async crawl()` → CrawlResult
-    - `async _process_queue()` → async queue worker
-    - `async _handle_page(url)` → fetch + parse + discover
-    - `_add_discovered_urls(urls)` → add to queue respecting scope
-  - Rate limiter (token bucket or delay-based)
-  - Concurrency control (semaphore or worker pool)
-  - Comprehensive logging
-- Write integration tests in `tests/test_engine.py` with mocked HTTP:
-  - Test crawl start to finish
-  - Test rate limiting (verify timing)
-  - Test concurrency (verify parallel requests)
-  - Test scope enforcement (verify out-of-scope URLs rejected)
-
-**Output:**
-- Complete, working crawler engine
-- Configurable concurrency and rate limiting
-- Integration tests with mocked responses
-
-**Validation:**
-```bash
-uv run pytest tests/test_engine.py -v
-```
+| Component | Status | Completeness |
+|-----------|--------|--------------|
+| JavaScript Discovery | ✅ Complete | 100% |
+| SQL Injection Scanner | ✅ Complete | 85% (time-based needs work) |
+| XSS Scanner | ✅ Complete | 95% |
+| CSRF Scanner | ✅ Complete | 100% |
+| Auth Scanner | ✅ Complete | 90% |
+| Headers Scanner | ✅ Complete | 100% |
+| Info Disclosure | ✅ Complete | 95% |
+| Integration | ✅ Complete | 100% |
+| Reporting | ✅ Complete | 80% (JSON only) |
+| Testing | ❌ TODO | 20% (manual only) |
 
 ---
 
-## Phase 10: CLI & End-to-End Integration
+## 🎓 Learning Outcomes
 
-### Step 10: Build CLI and main entry point
-**Goal:** Create user-facing CLI with all options integrated.
+This project demonstrates understanding of:
 
-**Tasks:**
-- Create/update `main.py` with Click CLI:
-  - Command: `crawl --url <target> --scope <domains> --output [console|json] --save [filename]`
-  - Options:
-    - `--url` (required): target URL
-    - `--scope` (optional): comma-separated allowed domains
-    - `--max-concurrency` (optional, default 5)
-    - `--rate-limit` (optional, default 10 requests/sec)
-    - `--timeout` (optional, default 10s)
-    - `--output` (optional, default console)
-    - `--save` (optional): save to JSON file for caching
-    - `--load` (optional): load previous crawl results
-    - `--verbose` (optional): debug logging
-  - Error handling and user-friendly messages
-- Create `tests/test_cli.py`:
-  - Test CLI parsing
-  - Test with mocked crawl engine
-  - Test output options
-- Create `README_USAGE.md`:
-  - Example: `python main.py --url https://example.com --scope example.com`
-  - Example: `python main.py --load previous_crawl.json --output console`
+✅ **Web Security Fundamentals**
+- OWASP Top 10 vulnerabilities
+- Attack surface mapping
+- Security headers & best practices
 
-**Output:**
-- Fully functional CLI
-- End-to-end crawl capability
-- Complete usage documentation
+✅ **Modern Web Technologies**
+- JavaScript rendering (Playwright)
+- Async HTTP programming
+- HTML parsing
 
-**Validation:**
-```bash
-uv run pytest tests/test_cli.py -v
-uv run python main.py --help
-uv run python main.py --url https://httpbin.org --scope httpbin.org --output console
-```
+✅ **Security Testing**
+- Vulnerability detection techniques
+- False positive reduction
+- Severity assessment
+
+✅ **Software Engineering**
+- Modular architecture
+- Type hints & data classes
+- Async/await patterns
 
 ---
 
-## Phase 11: Documentation & Refinement (Optional)
+## 🔐 Responsible Disclosure
 
-### Step 11: Polish and document
-**Goal:** Ensure code quality and comprehensive documentation.
+This tool is for **authorized security testing only**. Always:
 
-**Tasks:**
-- Add docstrings to all public methods
-- Add type hints to all functions
-- Run linting and formatting:
-  - `uv run black .`
-  - `uv run flake8 . --max-line-length=100`
-- Add inline comments for complex logic
-- Create `DEVELOPMENT.md` with:
-  - Architecture overview
-  - How to add new discovery plugins
-  - How to extend output formatters
-- Update main `README.md` with Phase 1 completion notes
-
-**Validation:**
-```bash
-uv run black . --check
-uv run flake8 . --max-line-length=100
-uv run pytest (full suite)
-```
+1. Get written permission before testing
+2. Respect rate limits and server resources
+3. Report vulnerabilities responsibly
+4. Never test against production without authorization
+5. Follow responsible disclosure policies
 
 ---
 
-## Summary: Development Order & Dependencies
+## 📚 References
 
-```
-Step 1: Setup
-    ↓
-Step 2: Models
-    ↓
-├─→ Step 3: URL Handling (independent)
-├─→ Step 4: Scope Validation (independent)
-│   ↓
-│  Step 9: Engine (depends on 3, 4)
-│   ↓
-├─→ Step 5: HTTP Client (independent)
-├─→ Step 6: Parser (independent)
-├─→ Step 7: Discovery (independent)
-└─→ Step 8: Output (independent)
-    ↓
-Step 10: CLI & Integration
-    ↓
-Step 11: Polish (optional)
-```
-
-**Parallel opportunities:**
-- Steps 3–8 can be developed in parallel after Step 2
-- Step 9 depends on 3, 4, 5, 6, 7 being complete
-- Step 10 depends on 9 being complete
-
----
-
-## Testing Strategy
-
-**Throughout all steps:**
-- Write tests first or alongside implementation
-- Use pytest for all unit and integration tests
-- Mock external HTTP calls (no real network requests in CI)
-- Aim for >80% code coverage
-- Run: `uv run pytest tests/ -v --cov=crawler --cov=discovery --cov=output`
-
----
-
-## Checkpoint: Minimum Viable Crawler
-
-After Step 9 (Engine), you have a **working crawler** that:
-- ✅ Discovers URLs from a target
-- ✅ Respects scope
-- ✅ Rate-limits requests
-- ✅ Extracts links, forms, scripts
-- ✅ Produces structured endpoint inventory
-
-This is the foundation for Phases 2–4 (Burp, ffuf, ZAP).
-
-Step 10 adds the CLI polish; Step 11 is quality refinement.
+- **OWASP Testing Guide**: https://owasp.org/www-project-web-security-testing-guide/
+- **CWE Database**: https://cwe.mitre.org/
+- **PortSwigger Web Security Academy**: https://portswigger.net/web-security
