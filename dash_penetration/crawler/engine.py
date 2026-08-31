@@ -286,9 +286,12 @@ class CrawlEngine:
                         script_result = script_discovery.analyze(scripts)
 
                         if script_result:
-                            for script_ref in script_result.scripts:
+                            # Add external scripts to queue and endpoint
+                            for script_ref in script_result.external_scripts:
                                 if script_ref.src:
-                                    self._add_to_queue(script_ref.src, DiscoverySource.SCRIPT)
+                                    self._add_to_queue(
+                                        script_ref.src, DiscoverySource.SCRIPT
+                                    )
                                     endpoint.scripts.append(script_ref.src)
 
                     # Detect API endpoints
