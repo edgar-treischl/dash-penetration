@@ -257,6 +257,10 @@ class XSSScanner:
         """Identify form type based on field names and action."""
         fields_lower = [f.lower() for f in field_names]
         
+        # Registration forms (check FIRST, before login)
+        if any(f in fields_lower for f in ["confirm_password", "password_confirm"]):
+            return f"Registration form (action: {form_action})"
+        
         # Login forms
         if any(f in fields_lower for f in ["username", "password", "email"]):
             if "password" in fields_lower:
@@ -266,10 +270,6 @@ class XSSScanner:
         if any(f in fields_lower for f in ["message", "subject", "name", "email"]):
             if "message" in fields_lower:
                 return f"Contact form (action: {form_action})"
-        
-        # Registration forms
-        if any(f in fields_lower for f in ["confirm_password", "password_confirm"]):
-            return f"Registration form (action: {form_action})"
         
         # Generic form
         return f"Form with fields: {', '.join(field_names[:3])}... (action: {form_action})"
