@@ -60,6 +60,8 @@ def generate_quarto_report(json_path: str) -> str:
     qmd.append("    toc-depth: 3")
     qmd.append("    code-fold: false")
     qmd.append("    theme: cosmo")
+    qmd.append("    self-contained: true")
+    qmd.append("    embed-resources: true")
     qmd.append("---")
     qmd.append("")
     
