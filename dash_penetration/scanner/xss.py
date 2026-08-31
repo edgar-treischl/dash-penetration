@@ -94,15 +94,23 @@ class XSSScanner:
             True if vulnerable reflection detected
         """
         if not encoded:
-            # Check for exact reflection
+            # Check for exact reflection of the payload
+            # This is the only reliable indicator of reflected XSS
             if payload in response_text:
                 return True
-
-            # Check for partial reflection (without encoding)
-            dangerous_chars = ["<script", "onerror", "onload", "javascript:"]
-            return any(char in response_text.lower() for char in dangerous_chars)
+            
+            # For HTML context, check if key parts of payload are reflected
+            # e.g., if payload contains 'alert', check for both alert and context
+            if "alert" in payload.lower():
+                alert_pattern = "alert"
+                # Only flag if 'alert' appears in a way that suggests script execution
+                # Not just anywhere in the HTML (which could be comments, strings, etc.)
+                # More conservative: only flag if exact payload found
+                pass
+            
+            return False
         else:
-            # For encoded payloads, check if they get decoded
+            # For encoded payloads, check if they get decoded and appear in response
             return payload in response_text
 
     async def scan_parameter(
@@ -182,7 +190,10 @@ class XSSScanner:
 
                 response_text = response.text()
 
-                if "<script" in response_text.lower() or "alert" in response_text:
+                # Check if the encoded payload appears in the response
+                # or if it was decoded and executed
+                decoded_payload = payload.replace("%3C", "<").replace("%3E", ">").replace("%27", "'").replace("%22", '"')
+                if decoded_payload in response_text or payload in response_text:
                     # Build test URL for reporting
                     if method.upper() == "GET":
                         reported_test_url = f"{url}?{param_name}={payload}"
