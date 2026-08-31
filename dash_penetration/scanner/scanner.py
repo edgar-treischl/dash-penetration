@@ -55,6 +55,12 @@ class ScanResult:
     parameter: Optional[str] = None
     """Parameter that was vulnerable"""
 
+    form_context: Optional[str] = None
+    """Context about which form/endpoint (e.g., 'Login form', 'API endpoint: /auth/login')"""
+
+    test_url: Optional[str] = None
+    """The actual URL that was tested (with parameters/payload)"""
+
     def to_dict(self) -> dict:
         """Convert to dictionary."""
         return {
@@ -69,6 +75,8 @@ class ScanResult:
             "timestamp": self.timestamp.isoformat(),
             "payload": self.payload,
             "parameter": self.parameter,
+            "form_context": self.form_context,
+            "test_url": self.test_url,
         }
 
 

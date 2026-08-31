@@ -111,6 +111,7 @@ class XSSScanner:
         param_name: str,
         param_value: str,
         method: str = "GET",
+        form_context: Optional[str] = None,
     ) -> list[ScanResult]:
         """
         Scan a parameter for XSS vulnerabilities.
@@ -139,6 +140,12 @@ class XSSScanner:
 
                 # Check if payload is reflected
                 if self._detect_xss_reflection(payload, response_text):
+                    # Build test URL for reporting
+                    if method.upper() == "GET":
+                        reported_test_url = f"{url}?{param_name}={payload}"
+                    else:
+                        reported_test_url = f"{url} (POST data: {param_name}={payload})"
+                    
                     results.append(
                         ScanResult(
                             vulnerability_type="Cross-Site Scripting (Reflected XSS)",
@@ -155,6 +162,8 @@ class XSSScanner:
                             confidence=90,
                             payload=payload,
                             parameter=param_name,
+                            test_url=reported_test_url,
+                            form_context=form_context,
                         )
                     )
                     break  # Found vulnerability
@@ -174,6 +183,12 @@ class XSSScanner:
                 response_text = response.text()
 
                 if "<script" in response_text.lower() or "alert" in response_text:
+                    # Build test URL for reporting
+                    if method.upper() == "GET":
+                        reported_test_url = f"{url}?{param_name}={payload}"
+                    else:
+                        reported_test_url = f"{url} (POST data: {param_name}={payload})"
+                    
                     results.append(
                         ScanResult(
                             vulnerability_type="Cross-Site Scripting (Encoded XSS)",
@@ -187,6 +202,8 @@ class XSSScanner:
                             confidence=85,
                             payload=payload,
                             parameter=param_name,
+                            test_url=reported_test_url,
+                            form_context=form_context,
                         )
                     )
                     break
@@ -209,16 +226,42 @@ class XSSScanner:
         """
         results = []
 
+        # Identify the form by its fields
+        field_names = [field.name for field in form_fields]
+        form_context = self._identify_form(field_names, form_action)
+
         for field in form_fields:
             field_results = await self.scan_parameter(
                 form_action,
                 field.name,
                 field.value or "test",
                 method="POST",
+                form_context=form_context,
             )
             results.extend(field_results)
 
         return results
+
+    def _identify_form(self, field_names: list[str], form_action: str) -> str:
+        """Identify form type based on field names and action."""
+        fields_lower = [f.lower() for f in field_names]
+        
+        # Login forms
+        if any(f in fields_lower for f in ["username", "password", "email"]):
+            if "password" in fields_lower:
+                return f"Login form (action: {form_action})"
+        
+        # Contact forms
+        if any(f in fields_lower for f in ["message", "subject", "name", "email"]):
+            if "message" in fields_lower:
+                return f"Contact form (action: {form_action})"
+        
+        # Registration forms
+        if any(f in fields_lower for f in ["confirm_password", "password_confirm"]):
+            return f"Registration form (action: {form_action})"
+        
+        # Generic form
+        return f"Form with fields: {', '.join(field_names[:3])}... (action: {form_action})"
 
     def scan_javascript_code(self, js_code: str, url: str) -> list[ScanResult]:
         """

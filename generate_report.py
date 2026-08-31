@@ -122,6 +122,20 @@ def generate_quarto_report(json_path: str) -> str:
                 qmd.append(f"**Parameter:** `{escape_for_display(vuln['parameter'])}`")
                 qmd.append("")
             
+            # Form context (NEW)
+            if vuln.get('form_context'):
+                qmd.append(f"**Form Context:** {escape_for_display(vuln['form_context'])}")
+                qmd.append("")
+            
+            # Test URL (NEW)
+            if vuln.get('test_url'):
+                qmd.append(f"**Test URL:**")
+                qmd.append("")
+                qmd.append("```text")
+                qmd.append(escape_for_display(vuln['test_url']))
+                qmd.append("```")
+                qmd.append("")
+            
             if vuln.get('payload'):
                 qmd.append(f"**Payload:**")
                 qmd.append("")

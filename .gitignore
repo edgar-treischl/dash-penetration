@@ -52,6 +52,7 @@ htmlcov/
 pentest_report_*.json
 pentest_report_*.qmd
 pentest_report_*.html
+pentest_report_*_files/
 
 # Great Docs build directory (ephemeral, do not commit)
 great-docs/
