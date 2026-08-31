@@ -5,7 +5,6 @@ These tests verify that the XSS scanner correctly identifies true vulnerabilitie
 and doesn't flag normal HTML structure as vulnerable.
 """
 
-import pytest
 from dash_penetration.scanner.xss import XSSScanner
 
 

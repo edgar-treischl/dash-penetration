@@ -131,7 +131,7 @@ def generate_quarto_report(json_path: str) -> str:
 
             # Test URL (NEW)
             if vuln.get("test_url"):
-                qmd.append(f"**Test URL:**")
+                qmd.append("**Test URL:**")
                 qmd.append("")
                 qmd.append("```text")
                 qmd.append(escape_for_display(vuln["test_url"]))
@@ -139,7 +139,7 @@ def generate_quarto_report(json_path: str) -> str:
                 qmd.append("")
 
             if vuln.get("payload"):
-                qmd.append(f"**Payload:**")
+                qmd.append("**Payload:**")
                 qmd.append("")
                 qmd.append("```text")
                 qmd.append(escape_for_display(vuln["payload"]))
@@ -161,9 +161,11 @@ def generate_quarto_report(json_path: str) -> str:
             qmd.append("## Technical Details")
             qmd.append("")
             cwe_num = vuln["cwe_id"].split("-")[1] if "-" in vuln["cwe_id"] else "0"
-            qmd.append(
-                f"- **CWE ID:** [{escape_for_display(vuln['cwe_id'])}](https://cwe.mitre.org/data/definitions/{cwe_num}.html)"
+            cwe_link = (
+                f"- **CWE ID:** [{escape_for_display(vuln['cwe_id'])}]"
+                f"(https://cwe.mitre.org/data/definitions/{cwe_num}.html)"
             )
+            qmd.append(cwe_link)
             qmd.append(f"- **Confidence:** {vuln['confidence']}%")
             qmd.append(f"- **Timestamp:** {escape_for_display(str(vuln['timestamp']))}")
             qmd.append("")
@@ -239,9 +241,9 @@ def main():
         f.write(qmd_content)
 
     print(f"✅ Quarto markdown generated: {output_path}")
-    print(f"\nTo render HTML report:")
+    print("\nTo render HTML report:")
     print(f"  quarto render {output_path}")
-    print(f"\nOr use make:")
+    print("\nOr use make:")
     print(f"  make report FILE={json_path}")
 
 

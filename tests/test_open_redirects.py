@@ -4,7 +4,6 @@ Tests for Open Redirect scanner.
 Tests verify detection of open redirect vulnerabilities and prevention of false positives.
 """
 
-import pytest
 from dash_penetration.scanner.open_redirects import OpenRedirectScanner
 
 

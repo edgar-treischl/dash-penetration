@@ -21,7 +21,7 @@ async def crawl_with_js(url: str, wait_time: int = 3000):
         wait_time: Time to wait for JS to render (milliseconds)
     """
     print("=" * 80)
-    print(f"🔧 JAVASCRIPT-ENABLED CRAWL")
+    print("🔧 JAVASCRIPT-ENABLED CRAWL")
     print("=" * 80)
     print(f"Target: {url}")
     print(f"Wait time: {wait_time}ms")
@@ -72,7 +72,7 @@ async def crawl_with_js(url: str, wait_time: int = 3000):
         forms = parser.extract_forms(html_content)
         scripts = parser.extract_scripts(html_content)
 
-        print(f"\n📊 DISCOVERY RESULTS:")
+        print("\n📊 DISCOVERY RESULTS:")
         print(f"  Links found: {len(links)}")
         print(f"  Forms found: {len(forms)}")
         print(f"  Scripts found: {len(scripts)}")
@@ -117,7 +117,7 @@ async def crawl_with_js(url: str, wait_time: int = 3000):
         # Group by type
         api_requests = [r for r in requests if r["resource_type"] in ["xhr", "fetch"]]
         if api_requests:
-            print(f"\n  ⚠️  XHR/Fetch requests (potential API endpoints):")
+            print("\n  ⚠️  XHR/Fetch requests (potential API endpoints):")
             seen = set()
             for req in api_requests:
                 if req["url"] not in seen:
@@ -125,7 +125,7 @@ async def crawl_with_js(url: str, wait_time: int = 3000):
                     seen.add(req["url"])
 
         # Show HTML structure
-        print(f"\n📄 PAGE STRUCTURE:")
+        print("\n📄 PAGE STRUCTURE:")
 
         # Count interactive elements
         buttons = await page.query_selector_all("button")
@@ -143,11 +143,11 @@ async def crawl_with_js(url: str, wait_time: int = 3000):
         print(f"  Page title: {title}")
 
         # Check for specific elements
-        print(f"\n🎯 INTERACTIVE ELEMENTS:")
+        print("\n🎯 INTERACTIVE ELEMENTS:")
 
         # Get button texts
         if buttons:
-            print(f"  Buttons found:")
+            print("  Buttons found:")
             for btn in buttons[:10]:
                 text = await btn.inner_text()
                 if text.strip():
@@ -155,19 +155,21 @@ async def crawl_with_js(url: str, wait_time: int = 3000):
 
         # Get input names
         if inputs:
-            print(f"  Input fields:")
+            print("  Input fields:")
             for inp in inputs[:10]:
                 name = await inp.get_attribute("name")
                 type_attr = await inp.get_attribute("type")
                 placeholder = await inp.get_attribute("placeholder")
                 if name or placeholder:
-                    print(
-                        f"    → {name or 'unnamed'} [{type_attr}] {f'({placeholder})' if placeholder else ''}"
+                    field_info = (
+                        f"    → {name or 'unnamed'} [{type_attr}] "
+                        f"{f'({placeholder})' if placeholder else ''}"
                     )
+                    print(field_info)
 
         await browser.close()
 
-        print(f"\n{'='*80}")
+        print(f"\n{'=' * 80}")
         print("✅ JavaScript crawl complete!")
         print("=" * 80)
 
