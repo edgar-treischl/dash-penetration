@@ -2,7 +2,7 @@
 Console output formatter for human-readable crawl results display.
 """
 
-from typing import List, Dict, Any
+from typing import Dict
 from dash_penetration.crawler.models import CrawlResult, Endpoint
 
 
@@ -50,7 +50,10 @@ class ConsoleFormatter:
         lines.append("-" * 120)
 
         # Header
-        header = f"{'METHOD':<8} {'PATH':<50} {'STATUS':<8} {'CONTENT-TYPE':<25} {'FORMS':<6} {'LINKS':<6} {'API':<5}"
+        header = (
+            f"{'METHOD':<8} {'PATH':<50} {'STATUS':<8} "
+            f"{'CONTENT-TYPE':<25} {'FORMS':<6} {'LINKS':<6} {'API':<5}"
+        )
         lines.append(ConsoleFormatter.BOLD + header + ConsoleFormatter.RESET)
         lines.append("-" * 120)
 
@@ -72,7 +75,10 @@ class ConsoleFormatter:
             method_color = ConsoleFormatter.BLUE
             method_str = f"{method_color}{method:<8}{ConsoleFormatter.RESET}"
 
-            row = f"{method_str} {path:<50} {status_str:<20} {content_type:<25} {forms:<6} {links:<6} {api_flag:<5}"
+            row = (
+                f"{method_str} {path:<50} {status_str:<20} "
+                f"{content_type:<25} {forms:<6} {links:<6} {api_flag:<5}"
+            )
             lines.append(row)
 
         lines.append("-" * 120)
@@ -94,10 +100,19 @@ class ConsoleFormatter:
         lines.append(f"{ConsoleFormatter.BOLD}Crawl Summary:{ConsoleFormatter.RESET}")
         lines.append("-" * 60)
 
-        lines.append(f"Target URL:       {ConsoleFormatter.CYAN}{result.target_url}{ConsoleFormatter.RESET}")
+        lines.append(
+            f"Target URL:       {ConsoleFormatter.CYAN}"
+            f"{result.target_url}{ConsoleFormatter.RESET}"
+        )
         lines.append(f"Scope Domains:    {', '.join(result.scope_domains)}")
-        lines.append(f"Pages Crawled:    {ConsoleFormatter.GREEN}{result.pages_crawled}{ConsoleFormatter.RESET}")
-        lines.append(f"Unique Endpoints: {ConsoleFormatter.GREEN}{len(result.endpoints)}{ConsoleFormatter.RESET}")
+        lines.append(
+            f"Pages Crawled:    {ConsoleFormatter.GREEN}"
+            f"{result.pages_crawled}{ConsoleFormatter.RESET}"
+        )
+        lines.append(
+            f"Unique Endpoints: {ConsoleFormatter.GREEN}"
+            f"{len(result.endpoints)}{ConsoleFormatter.RESET}"
+        )
 
         # Count by status
         status_counts: Dict[int, int] = {}
@@ -130,7 +145,9 @@ class ConsoleFormatter:
         api_count = sum(1 for e in result.endpoints.values() if e.is_api)
         if api_count > 0:
             lines.append("")
-            lines.append(f"API Endpoints:    {ConsoleFormatter.YELLOW}{api_count}{ConsoleFormatter.RESET}")
+            lines.append(
+                f"API Endpoints:    {ConsoleFormatter.YELLOW}{api_count}{ConsoleFormatter.RESET}"
+            )
 
         # Forms & Scripts
         forms_count = sum(len(e.forms) for e in result.endpoints.values())
@@ -138,9 +155,15 @@ class ConsoleFormatter:
         if forms_count > 0 or scripts_count > 0:
             lines.append("")
             if forms_count > 0:
-                lines.append(f"Forms Found:      {ConsoleFormatter.YELLOW}{forms_count}{ConsoleFormatter.RESET}")
+                lines.append(
+                    f"Forms Found:      {ConsoleFormatter.YELLOW}"
+                    f"{forms_count}{ConsoleFormatter.RESET}"
+                )
             if scripts_count > 0:
-                lines.append(f"Scripts Found:    {ConsoleFormatter.YELLOW}{scripts_count}{ConsoleFormatter.RESET}")
+                lines.append(
+                    f"Scripts Found:    {ConsoleFormatter.YELLOW}"
+                    f"{scripts_count}{ConsoleFormatter.RESET}"
+                )
 
         # Timing
         if result.start_time and result.end_time:
@@ -150,7 +173,9 @@ class ConsoleFormatter:
 
         if result.errors:
             lines.append("")
-            lines.append(f"{ConsoleFormatter.RED}Errors ({len(result.errors)}):{ConsoleFormatter.RESET}")
+            lines.append(
+                f"{ConsoleFormatter.RED}Errors ({len(result.errors)}):{ConsoleFormatter.RESET}"
+            )
             for error in result.errors[:5]:  # Show first 5 errors
                 lines.append(f"  • {error}")
             if len(result.errors) > 5:

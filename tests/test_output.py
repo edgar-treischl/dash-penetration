@@ -192,7 +192,11 @@ class TestConsoleFormatter:
 
     def test_format_crawl_summary_with_errors(self, sample_crawl_result):
         """Test that errors are shown."""
-        sample_crawl_result.errors = ["Connection timeout", "SSL certificate error", "Invalid response"]
+        sample_crawl_result.errors = [
+            "Connection timeout",
+            "SSL certificate error",
+            "Invalid response",
+        ]
         output = ConsoleFormatter.format_crawl_summary(sample_crawl_result)
 
         assert "Errors (3):" in output

@@ -3,7 +3,7 @@ JSON output formatter for crawl results serialization and deserialization.
 """
 
 import json
-from typing import Optional, Dict, Any
+from typing import Dict, Any
 from pathlib import Path
 from dash_penetration.crawler.models import CrawlResult
 
