@@ -10,6 +10,7 @@ from .http import (
     HTTPTooManyRedirectsError,
     HTTPStatusError,
 )
+from .parser import HTMLParser, Form, FormInput, ScriptReference
 
 __all__ = [
     "normalize_url",
@@ -26,4 +27,8 @@ __all__ = [
     "HTTPSSLError",
     "HTTPTooManyRedirectsError",
     "HTTPStatusError",
+    "HTMLParser",
+    "Form",
+    "FormInput",
+    "ScriptReference",
 ]
