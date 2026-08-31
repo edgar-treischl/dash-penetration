@@ -97,6 +97,8 @@ class InformationDisclosureScanner:
                             "Configure web server to deny access to version control and config files.",
                             cwe_id="CWE-200",
                             confidence=95,
+                            form_context=f"Exposed file: {path}",
+                            test_url=f"GET {url}",
                         )
                     )
 
@@ -118,10 +120,11 @@ class InformationDisclosureScanner:
                             description=f"Sensitive pattern detected in response: '{pattern}'",
                             evidence=f"Response contains: '{pattern}'",
                             remediation="Remove sensitive information from responses. "
-                            "Use environment variables for secrets. "
-                            "Review error messages and debug information.",
+                            "Avoid exposing API keys, passwords, or internal paths in HTML/JavaScript.",
                             cwe_id="CWE-200",
-                            confidence=70,
+                            confidence=85,
+                            form_context=f"Sensitive pattern in HTML: '{pattern}'",
+                            test_url=f"GET {base_url}",
                         )
                     )
 
@@ -162,6 +165,8 @@ class InformationDisclosureScanner:
                                 "Use authentication or IP whitelisting.",
                                 cwe_id="CWE-200",
                                 confidence=100,
+                                form_context=f"Exposed API docs at: {endpoint}",
+                                test_url=f"GET {url}",
                             )
                         )
                         break

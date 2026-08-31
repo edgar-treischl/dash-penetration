@@ -76,6 +76,9 @@ class SecurityHeadersScanner:
             # Check for missing security headers
             for header_name, header_info in self.SECURITY_HEADERS.items():
                 if header_name not in headers:
+                    # Determine where to configure based on hosting
+                    config_location = self._get_config_location(url, header_name)
+                    
                     results.append(
                         ScanResult(
                             vulnerability_type="Missing Security Header",
@@ -88,6 +91,8 @@ class SecurityHeadersScanner:
                             f"Configure your web server or application framework appropriately.",
                             cwe_id="CWE-693",
                             confidence=100,
+                            form_context=config_location,
+                            test_url=f"GET {url}",
                         )
                     )
 
@@ -95,6 +100,7 @@ class SecurityHeadersScanner:
             if "x-frame-options" in headers:
                 value = headers["x-frame-options"].lower()
                 if value not in ["deny", "sameorigin"]:
+                    config_location = self._get_config_location(url, "x-frame-options")
                     results.append(
                         ScanResult(
                             vulnerability_type="Insecure Security Header Configuration",
@@ -105,6 +111,8 @@ class SecurityHeadersScanner:
                             remediation="Set X-Frame-Options to 'DENY' or 'SAMEORIGIN'",
                             cwe_id="CWE-693",
                             confidence=100,
+                            form_context=config_location,
+                            test_url=f"GET {url}",
                         )
                     )
 
@@ -112,3 +120,20 @@ class SecurityHeadersScanner:
             pass
 
         return results
+
+    def _get_config_location(self, url: str, header_name: str) -> str:
+        """Determine where to configure the security header based on hosting."""
+        # Parse hosting info from URL
+        if "gitlab" in url.lower() and "pages" in url.lower():
+            return "GitLab Pages: Configure in _headers file or .gitlab-ci.yml (site-wide setting)"
+        elif "github" in url.lower() and "pages" in url.lower():
+            return "GitHub Pages: Configure in _headers file in repository root (site-wide setting)"
+        elif "cloudflare" in url.lower() or "workers" in url.lower():
+            return "Cloudflare Workers: Set headers in worker response (site-wide setting)"
+        elif "vercel" in url.lower():
+            return "Vercel: Configure in vercel.json or next.config.js headers (site-wide setting)"
+        elif "netlify" in url.lower():
+            return "Netlify: Configure in _headers or netlify.toml (site-wide setting)"
+        else:
+            return f"Infrastructure/CDN: Configure {header_name} header at server/CDN level (site-wide setting)"
+
