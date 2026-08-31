@@ -1,4 +1,4 @@
-.PHONY: help install lint format test coverage clean docs dev scan all check
+.PHONY: help install lint format test coverage clean docs dev scan report all check
 
 # Default target
 help:
@@ -10,6 +10,7 @@ help:
 	@echo "  make scan URL=https://your-app.com"
 	@echo "                            Run penetration test (requires URL)"
 	@echo "  make demo                 Run demo scan on test site"
+	@echo "  make report               Generate HTML report from latest scan"
 	@echo ""
 	@echo "Setup & Installation:"
 	@echo "  make install              Install dependencies with UV"
@@ -25,6 +26,10 @@ help:
 	@echo "  make test-v               Run tests with verbose output"
 	@echo "  make coverage             Run tests with coverage report"
 	@echo "  make coverage-html        Generate HTML coverage report"
+	@echo ""
+	@echo "Reporting:"
+	@echo "  make report               Generate HTML report from latest scan"
+	@echo "  make report FILE=<json>   Generate HTML report from specific file"
 	@echo ""
 	@echo "Documentation:"
 	@echo "  make docs                 Generate documentation"
@@ -83,6 +88,35 @@ scan-local:
 	@echo "Target: http://localhost:3000"
 	@echo ""
 	@uv run python pentest_scanner.py http://localhost:3000
+
+report:
+	@if [ -z "$(FILE)" ]; then \
+		LATEST=$$(ls -t pentest_report_*.json 2>/dev/null | head -1); \
+		if [ -z "$$LATEST" ]; then \
+			echo "❌ Error: No pentest reports found"; \
+			echo ""; \
+			echo "Run a scan first:"; \
+			echo "  make scan URL=https://your-app.com"; \
+			exit 1; \
+		fi; \
+		echo "📄 Generating report from latest scan: $$LATEST"; \
+		uv run python generate_report.py "$$LATEST"; \
+		QMD=$$(echo $$LATEST | sed 's/\.json/.qmd/'); \
+	else \
+		echo "📄 Generating report from: $(FILE)"; \
+		uv run python generate_report.py "$(FILE)"; \
+		QMD=$$(echo $(FILE) | sed 's/\.json/.qmd/'); \
+	fi; \
+	echo ""; \
+	echo "🎨 Rendering HTML with Quarto..."; \
+	quarto render "$$QMD"; \
+	HTML=$$(echo $$QMD | sed 's/\.qmd/.html/'); \
+	echo ""; \
+	echo "✅ Report generated: $$HTML"; \
+	command -v open >/dev/null 2>&1 && open "$$HTML" || echo "Open $$HTML in your browser"
+
+report-latest:
+	@$(MAKE) report
 
 # ============================================================================
 # Code Quality & Linting
@@ -173,6 +207,8 @@ clean:
 clean-reports:
 	@echo "🧹 Cleaning scan reports..."
 	find . -maxdepth 1 -name "pentest_report_*.json" -delete
+	find . -maxdepth 1 -name "pentest_report_*.qmd" -delete
+	find . -maxdepth 1 -name "pentest_report_*.html" -delete
 	@echo "✅ Scan reports removed"
 
 # ============================================================================

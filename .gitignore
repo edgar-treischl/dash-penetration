@@ -48,11 +48,10 @@ htmlcov/
 .env
 .env.local
 
-# Crawl results and cache
-crawl_results/
-*.json
-cache/
-
+# Penetration test reports
+pentest_report_*.json
+pentest_report_*.qmd
+pentest_report_*.html
 
 # Great Docs build directory (ephemeral, do not commit)
 great-docs/
