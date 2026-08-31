@@ -4,9 +4,8 @@ Scope validation for web crawler.
 Ensures crawling stays within authorized target domains and paths.
 """
 
-from typing import Optional, Set
+from typing import Optional
 from urllib.parse import urlparse
-import re
 
 
 class Scope:
@@ -22,18 +21,19 @@ class Scope:
         Initialize a Scope.
 
         Args:
-            allowed_domains: List of base domains (e.g., ['example.com', 'api.example.com'])
-            allowed_paths: Optional list of path prefixes to allow (e.g., ['/api', '/public'])
-            disallowed_paths: Optional list of path prefixes to disallow (e.g., ['/admin', '/private'])
+            allowed_domains: List of base domains (e.g.,
+                ['example.com', 'api.example.com'])
+            allowed_paths: Optional list of path prefixes to allow
+                (e.g., ['/api', '/public'])
+            disallowed_paths: Optional list of path prefixes to disallow
+                (e.g., ['/admin', '/private'])
         """
         if not allowed_domains:
             raise ValueError("At least one allowed domain is required")
 
         self.allowed_domains = [domain.lower().strip() for domain in allowed_domains]
         self.allowed_paths = [path.lower().strip() for path in (allowed_paths or [])]
-        self.disallowed_paths = [
-            path.lower().strip() for path in (disallowed_paths or [])
-        ]
+        self.disallowed_paths = [path.lower().strip() for path in (disallowed_paths or [])]
 
     @staticmethod
     def parse_domain_from_url(url: str) -> str:

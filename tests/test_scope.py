@@ -246,23 +246,15 @@ class TestParseDomain:
 
     def test_parse_domain_with_port(self):
         """Test parsing domain with port."""
-        assert (
-            Scope.parse_domain_from_url("https://example.com:8080/path")
-            == "example.com:8080"
-        )
+        assert Scope.parse_domain_from_url("https://example.com:8080/path") == "example.com:8080"
 
     def test_parse_domain_with_subdomain(self):
         """Test parsing domain with subdomain."""
-        assert (
-            Scope.parse_domain_from_url("https://api.example.com/path")
-            == "api.example.com"
-        )
+        assert Scope.parse_domain_from_url("https://api.example.com/path") == "api.example.com"
 
     def test_parse_domain_case_insensitive(self):
         """Test domain is lowercased."""
-        assert (
-            Scope.parse_domain_from_url("https://EXAMPLE.COM/path") == "example.com"
-        )
+        assert Scope.parse_domain_from_url("https://EXAMPLE.COM/path") == "example.com"
 
     def test_parse_domain_invalid_url(self):
         """Test invalid URL raises error."""
