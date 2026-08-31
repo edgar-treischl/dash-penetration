@@ -11,6 +11,8 @@ from .http import (
     HTTPStatusError,
 )
 from .parser import HTMLParser, Form, FormInput, ScriptReference
+from .engine import CrawlEngine, RateLimiter
+from .models import Page, Endpoint, CrawlResult, DiscoverySource
 
 __all__ = [
     "normalize_url",
@@ -31,4 +33,10 @@ __all__ = [
     "Form",
     "FormInput",
     "ScriptReference",
+    "CrawlEngine",
+    "RateLimiter",
+    "Page",
+    "Endpoint",
+    "CrawlResult",
+    "DiscoverySource",
 ]
