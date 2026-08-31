@@ -60,10 +60,38 @@ class AuthenticationScanner:
                     data={username_field: username, password_field: password},
                 )
 
-                # Check if login succeeded (status 200 and no error message)
-                if response.status_code == 200:
+                # Check if login succeeded
+                # Look for positive success indicators (not just absence of errors)
+                if response.status_code in (200, 302):
                     response_text = response.text().lower()
-                    if "invalid" not in response_text and "error" not in response_text:
+                    
+                    # Skip if this is a React/Vue/Angular SPA (returns static HTML shell)
+                    is_spa = any(
+                        marker in response_text
+                        for marker in ["<div id=\"root\"", "<div id=\"app\"", "ng-app", "vue-app"]
+                    )
+                    
+                    if is_spa:
+                        # SPA detected - authentication happens client-side, can't test this way
+                        continue
+                    
+                    # Look for positive success indicators
+                    success_indicators = [
+                        "welcome",
+                        "dashboard",
+                        "logout",
+                        "logged in",
+                        "login successful",
+                        "session",
+                    ]
+                    
+                    has_success = any(indicator in response_text for indicator in success_indicators)
+                    has_failure = any(
+                        error in response_text for error in ["invalid", "error", "failed", "incorrect"]
+                    )
+                    
+                    # Only flag if we see clear success indicators (not just absence of errors)
+                    if has_success and not has_failure:
                         results.append(
                             ScanResult(
                                 vulnerability_type="Weak Authentication Credentials",
