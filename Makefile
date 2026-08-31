@@ -1,10 +1,15 @@
-.PHONY: help install lint format test coverage clean docs dev watch security all check
+.PHONY: help install lint format test coverage clean docs dev scan all check
 
 # Default target
 help:
 	@echo "╔═══════════════════════════════════════════════════════════╗"
-	@echo "║         Web Crawler Development — Makefile Targets        ║"
+	@echo "║    Vulnerability Scanner (dash-penetration) — Makefile     ║"
 	@echo "╚═══════════════════════════════════════════════════════════╝"
+	@echo ""
+	@echo "🚀 Quick Start:"
+	@echo "  make scan URL=https://your-app.com"
+	@echo "                            Run penetration test (requires URL)"
+	@echo "  make demo                 Run demo scan on test site"
 	@echo ""
 	@echo "Setup & Installation:"
 	@echo "  make install              Install dependencies with UV"
@@ -14,31 +19,23 @@ help:
 	@echo "  make lint                 Run flake8 linter"
 	@echo "  make format               Format code with Black"
 	@echo "  make format-check         Check formatting without changing files"
-	@echo "  make type-check           Type checking (future enhancement)"
 	@echo ""
 	@echo "Testing:"
 	@echo "  make test                 Run pytest test suite"
 	@echo "  make test-v               Run tests with verbose output"
-	@echo "  make test-watch           Run tests in watch mode"
 	@echo "  make coverage             Run tests with coverage report"
 	@echo "  make coverage-html        Generate HTML coverage report"
 	@echo ""
-	@echo "Security:"
-	@echo "  make security             Run TruffleHog secret scanner"
-	@echo ""
 	@echo "Documentation:"
 	@echo "  make docs                 Generate documentation"
-	@echo "  make docs-preview         Generate documentation and Preview"
+	@echo "  make docs-preview         Generate documentation and preview"
 	@echo ""
 	@echo "Utility:"
 	@echo "  make clean                Remove build artifacts & cache"
+	@echo "  make clean-reports        Remove scan reports"
 	@echo "  make check                Run all checks (lint, format, test)"
-	@echo "  make all                  Install, format, lint, test, coverage"
+	@echo "  make all                  Install, format, lint, test"
 	@echo "  make help                 Show this help message"
-	@echo ""
-	@echo "Development:"
-	@echo "  make run                  Run the crawler CLI"
-	@echo "  make run-help             Show CLI help"
 	@echo ""
 
 # ============================================================================
@@ -56,6 +53,38 @@ dev: install
 	@echo "✅ Development setup complete"
 
 # ============================================================================
+# Penetration Testing
+# ============================================================================
+
+scan:
+	@if [ -z "$(URL)" ]; then \
+		echo "❌ Error: URL parameter required"; \
+		echo ""; \
+		echo "Usage:"; \
+		echo "  make scan URL=https://your-app.com"; \
+		echo ""; \
+		echo "Example:"; \
+		echo "  make scan URL=https://edgar-treischl.pages.gitlab.lrz.de/dash-demo/"; \
+		exit 1; \
+	fi
+	@echo "🔐 Starting penetration test..."
+	@echo "Target: $(URL)"
+	@echo ""
+	@uv run python pentest_scanner.py $(URL)
+
+demo:
+	@echo "🔐 Running demo scan on test site..."
+	@echo "Target: https://edgar-treischl.pages.gitlab.lrz.de/dash-demo/"
+	@echo ""
+	@uv run python pentest_scanner.py https://edgar-treischl.pages.gitlab.lrz.de/dash-demo/
+
+scan-local:
+	@echo "🔐 Scanning local development server..."
+	@echo "Target: http://localhost:3000"
+	@echo ""
+	@uv run python pentest_scanner.py http://localhost:3000
+
+# ============================================================================
 # Code Quality & Linting
 # ============================================================================
 
@@ -63,18 +92,14 @@ lint:
 	@echo "🔍 Running flake8 linter..."
 	uv run flake8 dash_penetration/ --count --statistics
 
-black:
+format-check:
 	@echo "📋 Checking Black formatting..."
 	uv run black --check .
 
-black-format:
+format:
 	@echo "🎨 Formatting code with Black..."
 	uv run black .
 	@echo "✅ Code formatted"
-
-type-check:
-	@echo "🔬 Type checking with mypy..."
-	@echo "⚠️  (mypy not yet configured)"
 
 # ============================================================================
 # Testing
@@ -88,53 +113,40 @@ test-v:
 	@echo "🧪 Running tests (verbose)..."
 	uv run pytest tests/ -vv --tb=long
 
-test-watch:
-	@echo "👁️  Watching for changes and running tests..."
-	uv run pytest-watch tests/ -v --tb=short
-
 coverage:
 	@echo "📊 Running tests with coverage..."
 	uv run pytest tests/ -v \
-		--cov=crawler \
-		--cov=discovery \
-		--cov=output \
+		--cov=dash_penetration/crawler \
+		--cov=dash_penetration/discovery \
+		--cov=dash_penetration/scanner \
 		--cov-report=term-missing \
 		--cov-report=xml
 
 coverage-html:
 	@echo "📈 Generating HTML coverage report..."
 	uv run pytest tests/ \
-		--cov=crawler \
-		--cov=discovery \
-		--cov=output \
+		--cov=dash_penetration/crawler \
+		--cov=dash_penetration/discovery \
+		--cov=dash_penetration/scanner \
 		--cov-report=html \
 		--cov-report=term-missing
 	@echo "✅ Coverage report generated: htmlcov/index.html"
 	@command -v open >/dev/null 2>&1 && open htmlcov/index.html || echo "Open htmlcov/index.html in browser"
 
 # ============================================================================
-# Security
-# ============================================================================
-
-security:
-	@echo "🔐 Running TruffleHog secret scanner..."
-	@command -v trufflehog >/dev/null 2>&1 || (echo "Installing TruffleHog..." && uv pip install trufflehog)
-	trufflehog filesystem . --only-verified --json 2>/dev/null | grep -q "trufflehog" && echo "✅ No secrets found" || echo "⚠️  Check output above"
-
-# ============================================================================
 # Documentation
 # ============================================================================
 
 docs-init:
-	@echo "📚 Generating documentation..."
+	@echo "📚 Initializing documentation..."
 	uv run great-docs init
 
 docs:
-	@echo "📚 Generating documentation..."
+	@echo "📚 Building documentation..."
 	uv run great-docs build
 
 docs-preview:
-	@echo "📚 Generating documentation..."
+	@echo "📚 Building documentation..."
 	uv run great-docs build
 	@echo "🚀 Starting documentation preview..."
 	uv run great-docs preview
@@ -142,19 +154,6 @@ docs-preview:
 docs-clean:
 	@echo "🧹 Cleaning Great Docs artifacts..."
 	rm -rf ./great-docs
-
-
-# ============================================================================
-# Running the Crawler
-# ============================================================================
-
-run:
-	@echo "🚀 Running crawler CLI..."
-	uv run python main.py crawl --help
-
-run-help:
-	@echo "📋 Crawler CLI help:"
-	uv run python main.py --help
 
 # ============================================================================
 # Cleanup
@@ -171,6 +170,11 @@ clean:
 	find . -type f -name "coverage.xml" -delete 2>/dev/null || true
 	@echo "✅ Cleanup complete"
 
+clean-reports:
+	@echo "🧹 Cleaning scan reports..."
+	find . -maxdepth 1 -name "pentest_report_*.json" -delete
+	@echo "✅ Scan reports removed"
+
 # ============================================================================
 # Composite Targets
 # ============================================================================
@@ -178,7 +182,7 @@ clean:
 check: lint format-check test
 	@echo "✅ All checks passed!"
 
-all: install format lint test coverage
+all: install format lint test
 	@echo ""
 	@echo "╔═══════════════════════════════════════════════════════════╗"
 	@echo "║              ✅ FULL BUILD SUCCESSFUL                      ║"
@@ -191,7 +195,7 @@ quick: format lint test
 # CI/CD Simulation
 # ============================================================================
 
-ci: clean install lint test coverage
+ci: clean install lint format-check test coverage
 	@echo ""
 	@echo "╔═══════════════════════════════════════════════════════════╗"
 	@echo "║            🤖 CI SIMULATION COMPLETE                       ║"
@@ -207,13 +211,14 @@ setup: install format lint test
 	@echo "╔═══════════════════════════════════════════════════════════╗"
 	@echo "║         🚀 DEVELOPMENT ENVIRONMENT READY                   ║"
 	@echo "║                                                           ║"
-	@echo "Commands you can use:                                       ║"
-	@echo "  make test           Run tests                             ║"
-	@echo "  make lint           Run linter                            ║"
-	@echo "  make format         Auto-format code                      ║"
-	@echo "  make coverage       Run with coverage                     ║"
-	@echo "  make run            Run the crawler                       ║"
-	@echo "│                                                           ║"
+	@echo "║  Commands you can use:                                    ║"
+	@echo "║    make scan URL=https://your-app.com  Run pentest        ║"
+	@echo "║    make test                           Run tests          ║"
+	@echo "║    make lint                           Run linter         ║"
+	@echo "║    make format                         Auto-format code   ║"
+	@echo "║    make coverage                       Run with coverage  ║"
+	@echo "║    make demo                           Run demo scan      ║"
+	@echo "║                                                           ║"
 	@echo "╚═══════════════════════════════════════════════════════════╝"
 
 # ============================================================================
@@ -233,20 +238,23 @@ status:
 	@uv pip list | wc -l | xargs echo "    (total packages)"
 	@echo ""
 	@echo "  Test files:"
-	@find tests/ -name "test_*.py" | wc -l | xargs echo "    (found)"
+	@find tests/ -name "test_*.py" 2>/dev/null | wc -l | xargs echo "    (found)"
 	@echo ""
-	@echo "  Source files:"
-	@find crawler/ discovery/ output/ -name "*.py" | wc -l | xargs echo "    (found)"
+	@echo "  Scanner modules:"
+	@find dash_penetration/scanner/ -name "*.py" ! -name "__init__.py" 2>/dev/null | wc -l | xargs echo "    (found)"
+	@echo ""
+	@echo "  Recent scan reports:"
+	@ls -1 pentest_report_*.json 2>/dev/null | wc -l | xargs echo "    (found)"
 	@echo ""
 
 # ============================================================================
-# Version Targets (for future CI/CD integration)
+# Version Targets
 # ============================================================================
 
 version:
-	@echo "Project: Web Crawler (dash-penetration)"
-	@grep "^python" .python-version
-	@echo "Framework: asyncio"
+	@echo "Project: Vulnerability Scanner (dash-penetration)"
+	@grep "^python" .python-version 2>/dev/null || echo "Python version not pinned"
+	@echo "Framework: asyncio + Playwright"
 	@echo "Package Manager: UV"
 
 # ============================================================================
