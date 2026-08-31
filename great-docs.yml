@@ -76,4 +76,4 @@ reference:
     contents:
       - crawler
       - discovery
-      - output
+      - scanner
