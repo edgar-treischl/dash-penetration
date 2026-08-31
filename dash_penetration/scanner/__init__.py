@@ -8,6 +8,7 @@ Detects common vulnerabilities:
 - Authentication weaknesses
 - Security header issues
 - Information disclosure
+- Open Redirects
 """
 
 from .sql_injection import SQLInjectionScanner
@@ -16,6 +17,7 @@ from .csrf import CSRFScanner
 from .auth import AuthenticationScanner
 from .headers import SecurityHeadersScanner
 from .info_disclosure import InformationDisclosureScanner
+from .open_redirects import OpenRedirectScanner
 from .scanner import VulnerabilityScanner, ScanResult, Severity
 
 __all__ = [
@@ -28,4 +30,5 @@ __all__ = [
     "AuthenticationScanner",
     "SecurityHeadersScanner",
     "InformationDisclosureScanner",
+    "OpenRedirectScanner",
 ]

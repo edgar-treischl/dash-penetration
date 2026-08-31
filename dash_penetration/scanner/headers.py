@@ -78,7 +78,6 @@ class SecurityHeadersScanner:
                 if header_name not in headers:
                     # Determine where to configure based on hosting
                     config_location = self._get_config_location(url, header_name)
-                    
                     results.append(
                         ScanResult(
                             vulnerability_type="Missing Security Header",
@@ -135,5 +134,4 @@ class SecurityHeadersScanner:
         elif "netlify" in url.lower():
             return "Netlify: Configure in _headers or netlify.toml (site-wide setting)"
         else:
-            return f"Infrastructure/CDN: Configure {header_name} header at server/CDN level (site-wide setting)"
-
+            return f"Infrastructure/CDN: Configure {header_name} header at server/CDN level"

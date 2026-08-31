@@ -15,10 +15,10 @@ from pathlib import Path
 
 SEVERITY_COLORS = {
     "critical": "#dc3545",  # Red
-    "high": "#fd7e14",      # Orange
-    "medium": "#ffc107",    # Yellow
-    "low": "#28a745",       # Green
-    "info": "#17a2b8",      # Blue
+    "high": "#fd7e14",  # Orange
+    "medium": "#ffc107",  # Yellow
+    "low": "#28a745",  # Green
+    "info": "#17a2b8",  # Blue
 }
 
 SEVERITY_EMOJI = {
@@ -40,19 +40,19 @@ def escape_for_display(text: str) -> str:
 
 def generate_quarto_report(json_path: str) -> str:
     """Generate Quarto markdown from JSON report."""
-    
+
     # Load JSON
-    with open(json_path, 'r') as f:
+    with open(json_path, "r") as f:
         data = json.load(f)
-    
+
     # Extract filename for title
     report_name = Path(json_path).stem
-    
+
     # Start building Quarto document
     qmd = []
     qmd.append("---")
-    qmd.append("title: \"Penetration Test Report\"")
-    qmd.append(f"subtitle: \"{report_name}\"")
+    qmd.append('title: "Penetration Test Report"')
+    qmd.append(f'subtitle: "{report_name}"')
     qmd.append(f"date: \"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\"")
     qmd.append("format:")
     qmd.append("  html:")
@@ -64,7 +64,7 @@ def generate_quarto_report(json_path: str) -> str:
     qmd.append("    embed-resources: true")
     qmd.append("---")
     qmd.append("")
-    
+
     # Executive Summary
     qmd.append("## Executive Summary")
     qmd.append("")
@@ -78,11 +78,11 @@ def generate_quarto_report(json_path: str) -> str:
     qmd.append(f"| 🟢 Low      | {data['low']} |")
     qmd.append(f"| ℹ️  Info     | {data['info']} |")
     qmd.append("")
-    
+
     # Findings by Severity
     qmd.append("## Findings")
     qmd.append("")
-    
+
     # Group vulnerabilities by severity
     by_severity = {
         "critical": [],
@@ -91,75 +91,79 @@ def generate_quarto_report(json_path: str) -> str:
         "low": [],
         "info": [],
     }
-    
-    for vuln in data.get('vulnerabilities', []):
-        severity = vuln['severity'].lower()
+
+    for vuln in data.get("vulnerabilities", []):
+        severity = vuln["severity"].lower()
         by_severity[severity].append(vuln)
-    
+
     # Generate findings sections
     finding_number = 1
     for severity in ["critical", "high", "medium", "low", "info"]:
         vulns = by_severity[severity]
         if not vulns:
             continue
-        
+
         emoji = SEVERITY_EMOJI[severity]
         qmd.append(f"### {emoji} {severity.upper()} Severity ({len(vulns)} findings)")
         qmd.append("")
-        
+
         for vuln in vulns:
-            qmd.append(f"#### Finding #{finding_number}: {escape_for_display(vuln['vulnerability_type'])}")
+            qmd.append(
+                f"#### Finding #{finding_number}: {escape_for_display(vuln['vulnerability_type'])}"
+            )
             qmd.append("")
-            
+
             # Basic info
             qmd.append(f"**URL:** `{escape_for_display(vuln['url'])}`")
             qmd.append("")
             qmd.append(f"**Description:** {escape_for_display(vuln['description'])}")
             qmd.append("")
-            
+
             # Parameter and payload
-            if vuln.get('parameter'):
+            if vuln.get("parameter"):
                 qmd.append(f"**Parameter:** `{escape_for_display(vuln['parameter'])}`")
                 qmd.append("")
-            
+
             # Form context (NEW)
-            if vuln.get('form_context'):
+            if vuln.get("form_context"):
                 qmd.append(f"**Form Context:** {escape_for_display(vuln['form_context'])}")
                 qmd.append("")
-            
+
             # Test URL (NEW)
-            if vuln.get('test_url'):
+            if vuln.get("test_url"):
                 qmd.append(f"**Test URL:**")
                 qmd.append("")
                 qmd.append("```text")
-                qmd.append(escape_for_display(vuln['test_url']))
+                qmd.append(escape_for_display(vuln["test_url"]))
                 qmd.append("```")
                 qmd.append("")
-            
-            if vuln.get('payload'):
+
+            if vuln.get("payload"):
                 qmd.append(f"**Payload:**")
                 qmd.append("")
                 qmd.append("```text")
-                qmd.append(escape_for_display(vuln['payload']))
+                qmd.append(escape_for_display(vuln["payload"]))
                 qmd.append("```")
                 qmd.append("")
-            
+
             # Evidence
             qmd.append(f"**Evidence:** {escape_for_display(vuln['evidence'])}")
             qmd.append("")
-            
+
             # Remediation
             qmd.append("**Remediation:**")
             qmd.append("")
-            qmd.append(escape_for_display(vuln['remediation']))
+            qmd.append(escape_for_display(vuln["remediation"]))
             qmd.append("")
-            
+
             # Technical details
-            qmd.append("::: {.callout-note collapse=\"true\"}")
+            qmd.append('::: {.callout-note collapse="true"}')
             qmd.append("## Technical Details")
             qmd.append("")
-            cwe_num = vuln['cwe_id'].split('-')[1] if '-' in vuln['cwe_id'] else '0'
-            qmd.append(f"- **CWE ID:** [{escape_for_display(vuln['cwe_id'])}](https://cwe.mitre.org/data/definitions/{cwe_num}.html)")
+            cwe_num = vuln["cwe_id"].split("-")[1] if "-" in vuln["cwe_id"] else "0"
+            qmd.append(
+                f"- **CWE ID:** [{escape_for_display(vuln['cwe_id'])}](https://cwe.mitre.org/data/definitions/{cwe_num}.html)"
+            )
             qmd.append(f"- **Confidence:** {vuln['confidence']}%")
             qmd.append(f"- **Timestamp:** {escape_for_display(str(vuln['timestamp']))}")
             qmd.append("")
@@ -167,9 +171,9 @@ def generate_quarto_report(json_path: str) -> str:
             qmd.append("")
             qmd.append("---")
             qmd.append("")
-            
+
             finding_number += 1
-    
+
     # Appendix
     qmd.append("## Appendix")
     qmd.append("")
@@ -177,35 +181,39 @@ def generate_quarto_report(json_path: str) -> str:
     qmd.append("")
     qmd.append("| Severity | Definition |")
     qmd.append("|----------|------------|")
-    qmd.append("| 🔴 Critical | Exploitable vulnerabilities that allow complete system compromise |")
+    qmd.append(
+        "| 🔴 Critical | Exploitable vulnerabilities that allow complete system compromise |"
+    )
     qmd.append("| 🟠 High | Serious vulnerabilities that expose sensitive data or functionality |")
-    qmd.append("| 🟡 Medium | Moderate vulnerabilities that require additional conditions to exploit |")
+    qmd.append(
+        "| 🟡 Medium | Moderate vulnerabilities that require additional conditions to exploit |"
+    )
     qmd.append("| 🟢 Low | Minor vulnerabilities with limited impact |")
     qmd.append("| ℹ️  Info | Informational findings that may not be directly exploitable |")
     qmd.append("")
-    
+
     qmd.append("### Vulnerability Categories")
     qmd.append("")
-    
+
     # Count by type
     type_counts = {}
-    for vuln in data.get('vulnerabilities', []):
-        vtype = vuln['vulnerability_type']
+    for vuln in data.get("vulnerabilities", []):
+        vtype = vuln["vulnerability_type"]
         type_counts[vtype] = type_counts.get(vtype, 0) + 1
-    
+
     qmd.append("| Category | Count |")
     qmd.append("|----------|-------|")
     for vtype, count in sorted(type_counts.items(), key=lambda x: x[1], reverse=True):
         qmd.append(f"| {escape_for_display(vtype)} | {count} |")
     qmd.append("")
-    
+
     qmd.append("### References")
     qmd.append("")
     qmd.append("- [OWASP Top 10](https://owasp.org/www-project-top-ten/)")
     qmd.append("- [CWE Database](https://cwe.mitre.org/)")
     qmd.append("- [OWASP Testing Guide](https://owasp.org/www-project-web-security-testing-guide/)")
     qmd.append("")
-    
+
     return "\n".join(qmd)
 
 
@@ -214,22 +222,22 @@ def main():
         print("Usage: python generate_report.py <pentest_report.json>")
         print("Example: python generate_report.py pentest_report_20260831_172000.json")
         sys.exit(1)
-    
+
     json_path = sys.argv[1]
-    
+
     if not Path(json_path).exists():
         print(f"Error: File not found: {json_path}")
         sys.exit(1)
-    
+
     # Generate Quarto markdown
     print(f"📄 Generating report from {json_path}...")
     qmd_content = generate_quarto_report(json_path)
-    
+
     # Write to .qmd file
     output_path = Path(json_path).stem + ".qmd"
-    with open(output_path, 'w') as f:
+    with open(output_path, "w") as f:
         f.write(qmd_content)
-    
+
     print(f"✅ Quarto markdown generated: {output_path}")
     print(f"\nTo render HTML report:")
     print(f"  quarto render {output_path}")

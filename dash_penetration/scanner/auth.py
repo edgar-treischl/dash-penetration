@@ -64,17 +64,17 @@ class AuthenticationScanner:
                 # Look for positive success indicators (not just absence of errors)
                 if response.status_code in (200, 302):
                     response_text = response.text().lower()
-                    
+
                     # Skip if this is a React/Vue/Angular SPA (returns static HTML shell)
                     is_spa = any(
                         marker in response_text
-                        for marker in ["<div id=\"root\"", "<div id=\"app\"", "ng-app", "vue-app"]
+                        for marker in ['<div id="root"', '<div id="app"', "ng-app", "vue-app"]
                     )
-                    
+
                     if is_spa:
                         # SPA detected - authentication happens client-side, can't test this way
                         continue
-                    
+
                     # Look for positive success indicators
                     success_indicators = [
                         "welcome",
@@ -84,13 +84,15 @@ class AuthenticationScanner:
                         "login successful",
                         "session",
                     ]
-                    
-                    has_success = any(indicator in response_text for indicator in success_indicators)
-                    has_failure = any(
-                        error in response_text for error in ["invalid", "error", "failed", "incorrect"]
+
+                    has_success = any(
+                        indicator in response_text for indicator in success_indicators
                     )
-                    
-                    # Only flag if we see clear success indicators (not just absence of errors)
+                    has_failure = any(
+                        err in response_text for err in ["invalid", "error", "failed", "incorrect"]
+                    )
+
+                    # Only flag if we see clear success indicators
                     if has_success and not has_failure:
                         results.append(
                             ScanResult(
@@ -98,10 +100,10 @@ class AuthenticationScanner:
                                 severity=Severity.CRITICAL,
                                 url=login_url,
                                 description=f"Weak credentials accepted: {username}/{password}",
-                                evidence=f"Login successful with credentials: {username}/{password}",
+                                evidence=f"Login successful with: {username}/{password}",
                                 remediation="Enforce strong password policies. "
-                                "Change default credentials. "
-                                "Implement account lockout after failed attempts.",
+                                "Change default credentials. Implement account "
+                                "lockout after failed attempts.",
                                 cwe_id="CWE-521",
                                 confidence=95,
                             )
@@ -135,10 +137,12 @@ class AuthenticationScanner:
                         vulnerability_type="Username Enumeration",
                         severity=Severity.MEDIUM,
                         url=login_url,
-                        description="Login form reveals whether usernames exist through different error messages",
+                        description="Login form reveals whether usernames exist through "
+                        "different error messages",
                         evidence="Different responses for valid vs invalid usernames",
                         remediation="Use generic error messages for all login failures. "
-                        "Return identical responses for both invalid username and invalid password.",
+                        "Return identical responses for both invalid username and "
+                        "invalid password.",
                         cwe_id="CWE-203",
                         confidence=80,
                     )

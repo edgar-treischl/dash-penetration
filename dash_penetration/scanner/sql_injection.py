@@ -8,7 +8,6 @@ Tests for:
 - UNION-based SQL injection
 """
 
-import asyncio
 from typing import Optional
 from dash_penetration.crawler.http import HTTPClient
 from .scanner import ScanResult, Severity
@@ -110,7 +109,12 @@ class SQLInjectionScanner:
         return any(pattern in response_lower for pattern in self.SQL_ERROR_PATTERNS)
 
     async def scan_parameter(
-        self, url: str, param_name: str, param_value: str, method: str = "GET", form_context: Optional[str] = None
+        self,
+        url: str,
+        param_name: str,
+        param_value: str,
+        method: str = "GET",
+        form_context: Optional[str] = None,
     ) -> list[ScanResult]:
         """
         Scan a single parameter for SQL injection.
@@ -146,7 +150,7 @@ class SQLInjectionScanner:
                             vulnerability_type="SQL Injection (Error-Based)",
                             severity=Severity.CRITICAL,
                             url=url,
-                            description=f"SQL injection vulnerability in parameter '{param_name}'. "
+                            description=f"SQL injection in '{param_name}'. "
                             f"SQL error messages detected in response.",
                             evidence=f"Payload '{payload}' triggered SQL error in response",
                             remediation="Use parameterized queries/prepared statements. "
@@ -190,9 +194,9 @@ class SQLInjectionScanner:
                         vulnerability_type="SQL Injection (Boolean-Based Blind)",
                         severity=Severity.HIGH,
                         url=url,
-                        description=f"Boolean-based blind SQL injection in parameter '{param_name}'. "
-                        f"Application behavior differs based on SQL boolean conditions.",
-                        evidence=f"True payload length: {true_length}, False payload length: {false_length}",
+                        description=f"Boolean-based blind SQL injection in '{param_name}'. "
+                        f"Application behavior differs based on SQL conditions.",
+                        evidence=f"True: {true_length}B, False: {false_length}B",
                         remediation="Use parameterized queries/prepared statements. "
                         "Implement proper error handling to avoid information leakage.",
                         cwe_id="CWE-89",
@@ -234,7 +238,11 @@ class SQLInjectionScanner:
 
         for field in form_fields:
             field_results = await self.scan_parameter(
-                form_action, field.name, field.value or "test", method="POST", form_context=form_context
+                form_action,
+                field.name,
+                field.value or "test",
+                method="POST",
+                form_context=form_context,
             )
             results.extend(field_results)
 
@@ -243,20 +251,20 @@ class SQLInjectionScanner:
     def _identify_form(self, field_names: list[str], form_action: str) -> str:
         """Identify form type based on field names and action."""
         fields_lower = [f.lower() for f in field_names]
-        
+
         # Login forms
         if any(f in fields_lower for f in ["username", "password", "email"]):
             if "password" in fields_lower:
                 return f"Login form (action: {form_action})"
-        
+
         # Contact forms
         if any(f in fields_lower for f in ["message", "subject", "name", "email"]):
             if "message" in fields_lower:
                 return f"Contact form (action: {form_action})"
-        
+
         # Registration forms
         if any(f in fields_lower for f in ["confirm_password", "password_confirm"]):
             return f"Registration form (action: {form_action})"
-        
+
         # Generic form
         return f"Form with fields: {', '.join(field_names[:3])}... (action: {form_action})"

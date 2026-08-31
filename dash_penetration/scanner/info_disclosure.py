@@ -94,7 +94,8 @@ class InformationDisclosureScanner:
                             description=f"Sensitive file accessible: {path}",
                             evidence=f"File returned HTTP 200 with {len(response.content)} bytes",
                             remediation="Remove or restrict access to sensitive files. "
-                            "Configure web server to deny access to version control and config files.",
+                            "Configure web server to deny access to version control "
+                            "and config files.",
                             cwe_id="CWE-200",
                             confidence=95,
                             form_context=f"Exposed file: {path}",
@@ -120,7 +121,7 @@ class InformationDisclosureScanner:
                             description=f"Sensitive pattern detected in response: '{pattern}'",
                             evidence=f"Response contains: '{pattern}'",
                             remediation="Remove sensitive information from responses. "
-                            "Avoid exposing API keys, passwords, or internal paths in HTML/JavaScript.",
+                            "Avoid exposing API keys, passwords, or internal paths in HTML/JS.",
                             cwe_id="CWE-200",
                             confidence=85,
                             form_context=f"Sensitive pattern in HTML: '{pattern}'",
@@ -161,8 +162,8 @@ class InformationDisclosureScanner:
                                 url=url,
                                 description="API documentation (Swagger/OpenAPI) exposed publicly",
                                 evidence=f"Swagger/OpenAPI found at {url}",
-                                remediation="Consider restricting access to API documentation in production. "
-                                "Use authentication or IP whitelisting.",
+                                remediation="Consider restricting access to API documentation in "
+                                "production. Use authentication or IP whitelisting.",
                                 cwe_id="CWE-200",
                                 confidence=100,
                                 form_context=f"Exposed API docs at: {endpoint}",

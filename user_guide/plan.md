@@ -1,4 +1,9 @@
-# Vulnerability Scanner Development Plan
+
+---
+title: "Vulnerability Scanner Development Plan"
+guide-section: "Getting Started"
+---
+
 
 ## Project Vision
 

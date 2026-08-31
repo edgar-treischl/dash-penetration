@@ -98,16 +98,10 @@ class XSSScanner:
             # This is the only reliable indicator of reflected XSS
             if payload in response_text:
                 return True
-            
+
             # For HTML context, check if key parts of payload are reflected
             # e.g., if payload contains 'alert', check for both alert and context
-            if "alert" in payload.lower():
-                alert_pattern = "alert"
-                # Only flag if 'alert' appears in a way that suggests script execution
-                # Not just anywhere in the HTML (which could be comments, strings, etc.)
-                # More conservative: only flag if exact payload found
-                pass
-            
+            # Only flag if exact payload found (conservative approach)
             return False
         else:
             # For encoded payloads, check if they get decoded and appear in response
@@ -153,14 +147,14 @@ class XSSScanner:
                         reported_test_url = f"{url}?{param_name}={payload}"
                     else:
                         reported_test_url = f"{url} (POST data: {param_name}={payload})"
-                    
+
                     results.append(
                         ScanResult(
                             vulnerability_type="Cross-Site Scripting (Reflected XSS)",
                             severity=Severity.HIGH,
                             url=url,
-                            description=f"Reflected XSS vulnerability in parameter '{param_name}'. "
-                            f"User input is reflected in the response without proper sanitization.",
+                            description=f"Reflected XSS in '{param_name}'. "
+                            f"User input is reflected without proper sanitization.",
                             evidence=f"Payload '{payload}' was reflected in response",
                             remediation="Implement proper output encoding/escaping. "
                             "Use Content-Security-Policy headers. "
@@ -192,20 +186,25 @@ class XSSScanner:
 
                 # Check if the encoded payload appears in the response
                 # or if it was decoded and executed
-                decoded_payload = payload.replace("%3C", "<").replace("%3E", ">").replace("%27", "'").replace("%22", '"')
+                decoded_payload = (
+                    payload.replace("%3C", "<")
+                    .replace("%3E", ">")
+                    .replace("%27", "'")
+                    .replace("%22", '"')
+                )
                 if decoded_payload in response_text or payload in response_text:
                     # Build test URL for reporting
                     if method.upper() == "GET":
                         reported_test_url = f"{url}?{param_name}={payload}"
                     else:
                         reported_test_url = f"{url} (POST data: {param_name}={payload})"
-                    
+
                     results.append(
                         ScanResult(
                             vulnerability_type="Cross-Site Scripting (Encoded XSS)",
                             severity=Severity.HIGH,
                             url=url,
-                            description=f"XSS via encoded payload in parameter '{param_name}'",
+                            description=f"XSS via encoded payload in '{param_name}'",
                             evidence=f"Encoded payload '{payload}' executed in response",
                             remediation="Implement proper output encoding at multiple levels. "
                             "Decode and re-encode user input appropriately.",
@@ -256,21 +255,21 @@ class XSSScanner:
     def _identify_form(self, field_names: list[str], form_action: str) -> str:
         """Identify form type based on field names and action."""
         fields_lower = [f.lower() for f in field_names]
-        
+
         # Registration forms (check FIRST, before login)
         if any(f in fields_lower for f in ["confirm_password", "password_confirm"]):
             return f"Registration form (action: {form_action})"
-        
+
         # Login forms
         if any(f in fields_lower for f in ["username", "password", "email"]):
             if "password" in fields_lower:
                 return f"Login form (action: {form_action})"
-        
+
         # Contact forms
         if any(f in fields_lower for f in ["message", "subject", "name", "email"]):
             if "message" in fields_lower:
                 return f"Contact form (action: {form_action})"
-        
+
         # Generic form
         return f"Form with fields: {', '.join(field_names[:3])}... (action: {form_action})"
 

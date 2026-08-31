@@ -1,6 +1,9 @@
-# Architecture Overview
+---
+title: "Architecture Overview"
+guide-section: "Getting Started"
+---
 
-## Project Purpose
+
 
 **dash-penetration** is an automated web application security scanner for authorized penetration testing. It combines JavaScript rendering with comprehensive vulnerability detection to test modern web applications.
 
