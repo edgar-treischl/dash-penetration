@@ -253,11 +253,11 @@ class CrawlEngine:
                     # Extract and analyze forms
                     forms = parser.extract_forms(html_text)
                     if forms:
-                        form_discovery = FormDiscovery(response.url, self.scope)
+                        form_discovery = FormDiscovery()
                         form_result = form_discovery.analyze(forms)
 
-                        if form_result and form_result.endpoints:
-                            for form_ep in form_result.endpoints:
+                        if form_result and form_result.forms:
+                            for form_ep in form_result.forms:
                                 # Add form action to queue
                                 self._add_to_queue(form_ep.action, DiscoverySource.FORM)
 
@@ -282,8 +282,12 @@ class CrawlEngine:
                     # Extract scripts
                     scripts = parser.extract_scripts(html_text)
                     if scripts:
+                        # Separate external and inline scripts for analysis
+                        external_scripts = [s.src for s in scripts if s.src and not s.is_inline]
+                        inline_scripts = [s.content for s in scripts if s.is_inline and s.content]
+                        
                         script_discovery = ScriptDiscovery(response.url)
-                        script_result = script_discovery.analyze(scripts)
+                        script_result = script_discovery.analyze(external_scripts, inline_scripts)
 
                         if script_result:
                             # Add external scripts to queue and endpoint
@@ -295,7 +299,7 @@ class CrawlEngine:
                                     endpoint.scripts.append(script_ref.src)
 
                     # Detect API endpoints
-                    api_discovery = APIDiscovery(response.url, self.scope)
+                    api_discovery = APIDiscovery(response.url)
                     api_result = api_discovery.analyze(html_text)
                     if api_result and api_result.endpoints:
                         endpoint.is_api = True
