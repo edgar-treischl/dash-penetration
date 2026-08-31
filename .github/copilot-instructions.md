@@ -2,125 +2,172 @@
 
 ## Project Overview
 
-This is a **web penetration testing learning project** focused on understanding attack surfaces step-by-step rather than relying on automated scanners. The project is structured as a learning progression with multiple phases, starting with a Python-based web crawler.
+This is a **vulnerability scanner test repository** for penetration testing of the author's own Dash web application. The goal is to identify security weak spots and vulnerabilities in a controlled, authorized environment.
 
-**Phase 1 (current focus):** Build a Python crawler for authorized website scanning.
+**Primary target:** https://edgar-treischl.pages.gitlab.lrz.de/dash-demo/ (React/Dash SPA)
+
+**Current focus:** Automated vulnerability scanning with JavaScript rendering capabilities to find:
+- Cross-Site Scripting (XSS) vulnerabilities
+- SQL Injection vulnerabilities
+- Missing security headers
+- CSRF weaknesses
+- Authentication issues
+- Information disclosure
+- Exposed APIs and sensitive endpoints
 
 ## Build, Test, and Lint Commands
 
-When Phase 1 development begins:
+**Quick start commands:**
 
-- **Install dependencies:** `uv pip install -r requirements.txt` (using UV as the package manager)
-- **Run the crawler:** `python main.py --url <target_url> [--save] [--output format]`
-- **Run tests:** `uv run pytest` or `uv run pytest tests/test_<module>.py` for individual test files
-- **Lint:** `uv run black --check .` and `uv run flake8 .` (to be integrated)
-- **Format code:** `uv run black .`
+- **Scan your app:** `make scan URL=https://your-app.com`
+- **Demo scan:** `make demo` (scans the test Dash app)
+- **Run tests:** `make test` or `uv run pytest tests/ -v --tb=short`
+- **Generate report:** `make report` (creates HTML from latest scan)
+- **Format code:** `make format` or `uv run black .`
+- **Check formatting:** `uv run black --check .`
+
+**Test commands:**
+- `uv run pytest` — Run all tests
+- `uv run pytest tests/test_<module>.py` — Run specific test file
+- `uv run pytest -v --tb=short` — Verbose with short tracebacks
 
 ## High-Level Architecture
 
-### Phase 1: Python Crawler (Active Development)
+### Core Components
 
-The crawler is designed as a modular system with clear separation of concerns:
+The scanner is designed as a modular vulnerability detection system:
 
-- **`crawler/engine.py`** — Main crawl loop managing the queue, concurrency, and orchestration of discovery
-- **`crawler/http.py`** — HTTP client handling redirects, timeouts, and response validation
-- **`crawler/parser.py`** — HTML parsing using `selectolax` for fast extraction
-- **`crawler/urls.py`** — URL normalization and deduplication (critical for preventing duplicates and scope creep)
-- **`crawler/scope.py`** — Scope validation ensuring crawls stay within authorized targets
-- **`crawler/models.py`** — Data structures for `Page` and `Endpoint` (for structured results)
+**Main Entry Point:**
+- **`pentest_scanner.py`** — Orchestrates 3-phase scanning: (1) JavaScript rendering & discovery, (2) Vulnerability scanning, (3) Report generation
 
-- **`discovery/`** — Discovery plugins that run during/after crawling:
-  - `links.py` — Extract HTML links
-  - `forms.py` — Extract forms and identify parameters
-  - `scripts.py` — Discover JavaScript resources
-  - `api.py` — Identify API endpoints
+**Crawler Foundation:**
+- **`dash_penetration/crawler/http.py`** — Async HTTP client with error handling, rate limiting, retries
+- **`dash_penetration/crawler/parser.py`** — Fast HTML parsing using `selectolax`
+- **`dash_penetration/crawler/scope.py`** — Scope validation for authorized targets only
 
-- **`output/`** — Output formatters:
-  - `console.py` — Human-readable terminal output
-  - `json.py` — Structured JSON export
+**Discovery Modules:**
+- **`dash_penetration/discovery/links.py`** — Extract links from HTML
+- **`dash_penetration/discovery/forms.py`** — Extract forms and identify input parameters
+
+**Vulnerability Scanners:**
+- **`dash_penetration/scanner/sql_injection.py`** — SQL injection detection (error-based, boolean-based, time-based)
+- **`dash_penetration/scanner/xss.py`** — XSS detection (reflected, encoded, DOM-based)
+- **`dash_penetration/scanner/csrf.py`** — CSRF token validation and unsafe method detection
+- **`dash_penetration/scanner/headers.py`** — Security headers scanning (CSP, X-Frame-Options, HSTS, etc.)
+- **`dash_penetration/scanner/auth.py`** — Authentication weaknesses (weak credentials, username enumeration)
+- **`dash_penetration/scanner/info_disclosure.py`** — Information disclosure (exposed files, APIs, sensitive patterns)
+
+**JavaScript Rendering:**
+- **`js_crawler.py`** — Playwright-based crawler for React/Vue/Angular SPAs
+- Clicks interactive elements to reveal hidden forms
+- Monitors network requests to discover API endpoints
+
+**Reporting:**
+- **`generate_report.py`** — Converts JSON scan results to self-contained Quarto HTML reports
+- Includes XSS-safe HTML escaping for payloads
+- Embeds all CSS/JS for portable single-file reports
 
 ### Key Dependencies
 
-- **`httpx`** — Async HTTP client for concurrent requests
+- **`httpx`** — Async HTTP client for concurrent vulnerability testing
 - **`selectolax`** — Fast HTML parsing (faster than BeautifulSoup)
+- **`playwright`** — Browser automation for JavaScript-rendered SPAs
 - **`asyncio`** — Built-in Python concurrency
-- **`uv`** — Fast Python package manager and lock file manager
+- **`uv`** — Fast Python package manager
+- **`quarto`** — Document rendering for HTML reports
+- **`pytest`** — Testing framework
 
-### Future Phases
+### Vulnerability Detection Approach
 
-Phases 2–4 (Burp Suite learning, ffuf content discovery, OWASP ZAP automation) are documented but not yet implemented. Each phase builds on the `Endpoint` inventory produced by Phase 1.
+Unlike traditional automated scanners that just run predefined checks, this scanner:
+
+1. **JavaScript rendering first** — Uses Playwright to discover hidden content in React/Vue/Angular apps
+2. **Form parameter extraction** — Identifies all input fields, including those revealed by clicking buttons
+3. **Targeted testing** — Tests each parameter with specific payloads for each vulnerability type
+4. **Evidence-based reporting** — Only flags vulnerabilities with clear evidence (not just guesses)
+5. **Confidence scoring** — Each finding includes a confidence score (0-100)
 
 ## Key Conventions and Patterns
 
-### URL Handling
+### Vulnerability Scanning
 
-- **Normalize all URLs** before deduplication (scheme, domain case-folding, parameter ordering)
-- **Track URL state** in the `Page` model (crawled, queued, failed)
-- **Validate scope** for every discovered URL before adding to the queue
+- **Always test on authorized targets only** — This scanner is for testing YOUR OWN applications
+- **SPA detection** — Automatically detects React/Vue/Angular apps and uses JavaScript rendering
+- **Rate limiting** — Implements delays between requests to avoid DoS
+- **Scope validation** — Every URL is validated against allowed domains before testing
+- **Evidence collection** — Each vulnerability includes the payload, parameter, and response evidence
 
-### HTTP Crawling
+### Scanner Architecture
 
-- Implement **rate limiting** to avoid overloading the target
-- **Follow redirects** (up to a configurable limit, typically 5)
-- **Respect timeouts** (default 10s, increase for slow targets)
-- **Record HTTP status and content type** on all requests
-- **Handle errors gracefully** — log failures, don't crash
+- **Independent scanners** — Each vulnerability type has its own scanner class
+- **Async-compatible** — All scanners support `async`/`await` for concurrent testing
+- **Context managers** — Scanners use `async with` for proper resource cleanup
+- **Standardized results** — All scanners return `ScanResult` objects with:
+  - `vulnerability_type` — Human-readable name
+  - `severity` — CRITICAL, HIGH, MEDIUM, LOW, INFO
+  - `url` — Where the vulnerability was found
+  - `description` — What the issue is
+  - `evidence` — Proof of the vulnerability
+  - `remediation` — How to fix it
+  - `cwe_id` — CWE database reference
+  - `confidence` — 0-100 score
 
-### Output Structure
+### False Positive Prevention
 
-The crawler produces a structured **endpoint inventory** with:
+The scanners implement several strategies to avoid false positives:
 
-```
-METHOD  PATH                STATUS  CONTENT_TYPE
-GET     /                   200     text/html
-GET     /login              200     text/html
-POST    /login              200     application/json
-GET     /api/products       200     application/json
-```
+1. **SPA detection** — Skip testing authentication on React/Vue/Angular apps (auth happens client-side)
+2. **Positive indicators** — Look for success indicators (e.g., "welcome", "dashboard") not just absence of errors
+3. **Response comparison** — Compare responses to detect actual differences vs. false positives
+4. **Pattern matching** — Use specific error patterns (e.g., SQL error messages) not generic keywords
+5. **Confidence scoring** — Lower confidence for ambiguous findings
 
-This inventory is the foundation for later analysis phases.
+## Code Organization
 
-### Code Organization
-
-- **Modular design** — Each module has a single responsibility (HTTP, parsing, scope, URLs, etc.)
+- **Modular design** — Each scanner has a single responsibility
 - **Async-first** — All I/O-bound code uses `async/await`
 - **Type hints** — Use Python type hints for clarity
-- **Models** — Use dataclasses or Pydantic for `Page` and `Endpoint` structures
-- **Configuration** — CLI arguments or `.env` file for target URL, scope rules, rate limits
+- **Dataclasses** — Use dataclasses for `ScanResult` and form structures
+- **Context managers** — Scanners implement `async with` for resource management
 
-### Testing Strategy
+## Testing Strategy
 
-- **Unit tests** for URL normalization, scope validation, and parsing logic
-- **Integration tests** for the crawl loop with mock HTTP responses
-- **Avoid testing against real servers** — use fixtures or mocked responses
+- **Unit tests** for HTTP client, HTML parser, and scope validation (115 tests passing)
+- **Mock HTTP responses** — Never test against real servers in unit tests
+- **Real-world testing** — Use the demo target (dash-demo app) for integration testing
+- **Evidence validation** — Verify that reported vulnerabilities are real (manual verification)
 
-## First Steps
+## Typical Workflow
 
-When starting Phase 1 implementation:
+1. **Scan an app:** `make scan URL=https://your-app.com`
+2. **Review JSON results:** `cat pentest_report_*.json`
+3. **Generate HTML report:** `make report`
+4. **Open report in browser:** `open pentest_report_*.html`
+5. **Fix vulnerabilities** in your app
+6. **Re-scan** to verify fixes
 
-1. Set up the project structure as outlined in the README
-2. Implement `crawler/urls.py` first (URL normalization and deduplication)
-3. Implement `crawler/scope.py` (scope validation)
-4. Build `crawler/http.py` (HTTP client with httpx)
-5. Add `crawler/parser.py` (link extraction with selectolax)
-6. Implement `discovery/` plugins (forms, scripts, API detection)
-7. Build `crawler/engine.py` (main crawl orchestration)
-8. Add output formatters and CLI in `main.py`
-9. Write tests as you go
+## Important Security Notes
 
-This order ensures the most critical and reusable components are solid before orchestration logic.
+- ⚠️ **Authorization required** — Only scan applications you own or have permission to test
+- ⚠️ **Not for production use** — This is a learning/testing tool, not a production security scanner
+- ⚠️ **Rate limiting** — The scanner implements delays to avoid DoS, but still be careful
+- ⚠️ **Scope control** — Always validate that scopes are correctly configured before scanning
 
-## Important Notes
+## Known Limitations
 
-- **Security** — This is an educational project for authorized testing only. Always get permission before crawling any target.
-- **Scope control** — The scope validation logic is critical; incorrect scope can lead to crawling unintended targets.
-- **Rate limiting** — Respect server resources and crawl at a reasonable rate (configurable).
-- **Caching crawl results** — The README mentions saving and reusing crawl results; implement a simple JSON or SQLite cache.
+1. **SPA authentication** — Cannot test authentication on React/Vue/Angular apps where auth happens entirely client-side
+2. **Time-based SQL injection** — Currently placeholder implementation (no real delay testing)
+3. **CAPTCHA/bot protection** — Scanner will be blocked by CAPTCHA or bot detection
+4. **Complex workflows** — Cannot handle multi-step workflows requiring specific sequences
+5. **Rate limiting detection** — May get rate-limited on heavily protected sites
 
-## Integration with Future Phases
+## Future Enhancements
 
-- Phase 2 (Burp Suite) builds on understanding endpoints from Phase 1
-- Phase 3 (ffuf) uses the endpoint inventory to discover additional hidden routes
-- Phase 4 (ZAP) validates and extends the inventory with automated security tests
+Planned improvements documented in `plan.md`:
 
-Each phase should reference the `Endpoint` structure from Phase 1.
+- **Phase 4:** SSRF vulnerability detection
+- **Phase 5:** File upload vulnerabilities
+- **Phase 6:** XXE (XML External Entity) detection
+- **Phase 7:** Advanced time-based blind injection testing
+- **Phase 8:** Directory traversal detection
+- **Phase 9:** CI/CD integration for continuous security testing
