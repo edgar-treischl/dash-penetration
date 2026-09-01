@@ -4,10 +4,6 @@
 
 A Python-based vulnerability scanner that combines JavaScript rendering with comprehensive security testing. Built for security learning and authorized testing of your own web applications.
 
-Next to do:
-1. API Endpoint Fuzzing (40 mins) - Discover more endpoints, find unauth access
-2. Rate Limiting Detection (30 mins) - Protect against brute force
-
 ## 🎯 What It Does
 
 This tool performs **automated penetration testing** by:

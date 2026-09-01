@@ -1,16 +1,10 @@
-
 ---
 title: "Security Checks & Vulnerability"
 guide-section: "Getting Started"
 ---
 
 
-
-## Implemented Security Checks
-
-### ✅ Currently Implemented (8 Vulnerability Types)
-
-#### 1. **Security Headers Scanning**
+## 1. **Security Headers Scanning**
 - **File:** `dash_penetration/scanner/headers.py`
 - **Detects:**
   - Missing Content-Security-Policy (HIGH)
@@ -52,7 +46,7 @@ Security headers provide browser-enforced security controls that can reduce the 
 
 The dash-penetration header scanner checks the HTTP response for a defined set of security headers and reports headers that are missing.
 
-2. Individual Security Header Checks
+### Individual Security Header Checks
 
 Content-Security-Policy (CSP) — HIGH
 Content-Security-Policy controls which scripts, styles, images, frames, and other resources a browser is allowed to load or execute, helping reduce the impact of attacks such as cross-site scripting (XSS).
@@ -87,7 +81,7 @@ X-Permitted-Cross-Domain-Policies — LOW
 X-Permitted-Cross-Domain-Policies controls how certain Adobe-related client applications can access resources across domains and is primarily a legacy security-hardening mechanism.
 
 
-3. CWE-693 — Protection Mechanism Failure
+### CWE-693 — Protection Mechanism Failure
 
 CWE-693 (Protection Mechanism Failure) describes situations where an expected security protection mechanism is missing, disabled, or ineffective.
 For security-header scanning, CWE-693 is relevant because the application may be missing a browser security mechanism that could provide additional protection.
@@ -152,9 +146,9 @@ XSS can have serious consequences because JavaScript executes in the security co
 ### XSS Detection
 
 The scanner checks for three main types of XSS:
-  - Reflected XSS
-  - Encoded XSS bypasses
-  - DOM-based XSS
+- Reflected XSS
+- Encoded XSS bypasses
+- DOM-based XSS
 
 The scanner uses more than 15 payload variations and is designed to reduce false positives by requiring exact payload reflection for reflected-XSS findings.
 
@@ -178,7 +172,8 @@ For example, if an application receives:
 ```
 
 and returns:
-```
+
+```html
 <p>Search results for: <script>alert(1)</script></p>
 ```
 
@@ -256,7 +251,6 @@ Because static analysis identifies suspicious code patterns rather than proving 
 #### Test Payloads
 
 The scanner uses 15+ XSS payload variations, including encoded payloads. Using multiple payloads is important because applications can behave differently depending on:
-
 - Characters contained in the payload
 - HTML context
 - JavaScript context
@@ -371,7 +365,7 @@ The overall goal is to identify potential XSS vulnerabilities while minimizing f
 
 ---
 
-#### 3. **SQL Injection**
+## 3. **SQL Injection**
 - **File:** `dash_penetration/scanner/sql_injection.py`
 - **Status:** ✅ Complete
 - **Types Detected:**

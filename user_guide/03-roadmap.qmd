@@ -1,0 +1,87 @@
+---
+title: "Vulnerability Testing Roadmap"
+guide-section: "Getting Started"
+---
+
+Next to do:
+1. API Endpoint Fuzzing (40 mins) - Discover more endpoints, find unauth access
+2. Rate Limiting Detection (30 mins) - Protect against brute force
+
+
+## 🚀 PLANNED ENHANCEMENTS (After XSS/Headers)
+
+
+#### 2. CORS MISCONFIGURATION
+- **Implementation Time:** 20 mins
+- **Effort:** Low
+- **Live Test Result:** ✅ CORS properly configured (not vulnerable)
+- **But should formalize detection**
+- **File to Create:** `dash_penetration/scanner/cors.py`
+
+#### 3. API ENDPOINT FUZZING
+- **Implementation Time:** 40 mins
+- **Effort:** Medium
+- **Already Discovered:** /auth/me endpoint (properly secured with 401)
+- **Paths to Test:** /api/*, /admin/*, /management/*, /internal/*
+- **File to Create:** `dash_penetration/scanner/api_fuzzer.py`
+
+#### 4. RATE LIMITING TESTS
+- **Implementation Time:** 30 mins
+- **Effort:** Low
+- **Test Method:** Send 100 rapid requests, check for 429 response
+- **Live Test Result:** ⚠️ No rate limiting detected
+- **File to Create:** `dash_penetration/scanner/rate_limiting.py`
+
+#### 5. WEAK CREDENTIALS EXPANSION
+- **Implementation Time:** 15 mins
+- **Effort:** Low
+- **Expand password list:** admin/password, test/test, guest/guest, demo/demo
+- **Update File:** `dash_penetration/scanner/auth.py`
+
+---
+
+## 📋 ROADMAP (from plan.md)
+
+| Phase | Feature | Status | Dependencies |
+|-------|---------|--------|---|
+| 1 | JavaScript Rendering | ✅ Done | - |
+| 2 | Core Scanners (XSS, SQLi, etc.) | ✅ Done | Phase 1 |
+| 3 | Security Headers | ✅ Done | Phase 1 |
+| **→ NEXT:** | **XSS Fix + Open Redirects** | ⏳ Todo | Phase 3 |
+| **→ NEXT:** | **CORS + API Fuzzing** | ⏳ Todo | Phase 3 |
+| 4 | SSRF Detection | ⏳ Planned | Phase 2 |
+| 5 | File Upload Vulnerabilities | ⏳ Planned | Phase 2 |
+| 6 | XXE Detection | ⏳ Planned | Phase 2 |
+| 7 | Time-based Blind SQLi | ⏳ Planned | Phase 2 |
+| 8 | Directory Traversal | ⏳ Planned | Phase 2 |
+| 9 | CI/CD Integration | ⏳ Planned | All |
+
+
+
+
+## 🎯 SUCCESS CRITERIA
+
+**After XSS Fix:**
+- Re-scan should show: 0 XSS vulnerabilities
+- HTML login form properly escaped
+- Payloads should return HTML-encoded, not executed
+
+**After Adding Headers:**
+- Re-scan should show: 0 missing security headers (or only info-level)
+- Configure in GitLab Pages _headers file
+- All responses include CSP, X-Frame-Options, etc.
+
+**After Quick Wins (2-3 hours):**
+- 11 → 16+ vulnerabilities detected
+- 40% more coverage of attack surface
+- Ready for Phase 4 (SSRF, XXE, etc.)
+
+---
+
+## 📝 NOTES FOR NEXT SESSION
+
+- XSS fix should be done in the Dash application itself, not the scanner
+- Scanner appears to be working correctly - identifying real vulnerabilities
+- Playwright error when clicking "Anmelden" button is non-critical but could be improved
+- Consider adding source map analysis for dependency version discovery
+- Rate limiting should be added to API if production deployment planned

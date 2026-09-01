@@ -1,4 +1,3 @@
-
 ---
 title: "Vulnerability Scanner Development Plan"
 guide-section: "Getting Started"
@@ -9,20 +8,18 @@ guide-section: "Getting Started"
 
 **dash-penetration** is an automated web application security scanner for authorized penetration testing. Unlike traditional crawlers that just map URLs, this tool actively tests for exploitable vulnerabilities.
 
----
 
-## ✅ Phase 1: JavaScript Rendering & Discovery (COMPLETE)
+##  Phase 1: JavaScript Rendering & Discovery 
 
-### Goal
 Discover application attack surface including dynamically rendered content.
 
 ### What We Built
-- ✅ JavaScript rendering with Playwright
-- ✅ Interactive element discovery (button clicking)
-- ✅ Form extraction (login, contact, etc.)
-- ✅ Network request monitoring (API endpoint discovery)
-- ✅ HTML parsing with selectolax
-- ✅ Link extraction
+-  JavaScript rendering with Playwright
+-  Interactive element discovery (button clicking)
+-  Form extraction (login, contact, etc.)
+-  Network request monitoring (API endpoint discovery)
+-  HTML parsing with selectolax
+-  Link extraction
 
 ### Files
 - `js_crawler.py` — JavaScript-enabled crawler
@@ -30,56 +27,55 @@ Discover application attack surface including dynamically rendered content.
 - `dash_penetration/discovery/forms.py` — Form extraction
 - `dash_penetration/discovery/links.py` — Link extraction
 
----
 
-## ✅ Phase 2: Vulnerability Scanner (COMPLETE)
+##  Phase 2: Vulnerability Scanner
 
 ### Goal
 Detect common web application vulnerabilities with high confidence.
 
 ### What We Built
 
-#### 1. SQL Injection Scanner ✅
+#### 1. SQL Injection Scanner
 - Error-based detection (database errors in responses)
 - Boolean-based blind injection
 - Time-based blind detection
 - Tests all form parameters
 - **File:** `dash_penetration/scanner/sql_injection.py`
 
-#### 2. XSS Scanner ✅
+#### 2. XSS Scanner   
 - Reflected XSS detection
 - Encoded payload testing
 - DOM-based XSS (static JavaScript analysis)
 - Tests all text inputs
 - **File:** `dash_penetration/scanner/xss.py`
 
-#### 3. CSRF Scanner ✅
+#### 3. CSRF Scanner   
 - Missing CSRF token detection
 - Unsafe GET method detection
 - Form security validation
 - **File:** `dash_penetration/scanner/csrf.py`
 
-#### 4. Authentication Scanner ✅
+#### 4. Authentication Scanner   
 - Weak/default credentials testing
 - Username enumeration detection
 - Login form analysis
 - **File:** `dash_penetration/scanner/auth.py`
 
-#### 5. Security Headers Scanner ✅
+#### 5. Security Headers Scanner   
 - Missing CSP detection
 - Missing X-Frame-Options
 - Missing HSTS
 - Complete header audit
 - **File:** `dash_penetration/scanner/headers.py`
 
-#### 6. Information Disclosure Scanner ✅
+#### 6. Information Disclosure Scanner   
 - Exposed .git/.env detection
 - Swagger/OpenAPI exposure
 - Sensitive pattern detection
 - Directory listing detection
 - **File:** `dash_penetration/scanner/info_disclosure.py`
 
-### Core Infrastructure ✅
+### Core Infrastructure   
 - `dash_penetration/scanner/scanner.py` — Orchestration + reporting
 - Severity levels: CRITICAL > HIGH > MEDIUM > LOW > INFO
 - ScanResult dataclass with CWE IDs, confidence scores, evidence
@@ -87,20 +83,20 @@ Detect common web application vulnerabilities with high confidence.
 
 ---
 
-## ✅ Phase 3: Integration & Reporting (COMPLETE)
+##  Phase 3: Integration & Reporting (COMPLETE)
 
 ### Goal
 Combine discovery + scanning into single automated workflow.
 
 ### What We Built
-- ✅ `pentest_scanner.py` — Main integrated scanner
-- ✅ 3-phase workflow:
+-  `pentest_scanner.py` — Main integrated scanner
+-  3-phase workflow:
   1. JavaScript rendering & discovery
   2. Vulnerability scanning (all 6 scanners)
   3. Report generation (console + JSON)
-- ✅ Color-coded severity output (🔴🟠🟡🟢ℹ️)
-- ✅ Structured JSON reports with full evidence
-- ✅ Remediation guidance for each finding
+-  Color-coded severity output (🔴🟠🟡🟢ℹ️)
+-  Structured JSON reports with full evidence
+-  Remediation guidance for each finding
 
 ### Example Usage
 ```bash
@@ -187,39 +183,7 @@ Currently: Placeholder detection
 - Memory usage profiling
 - Large-scale testing
 
----
 
-## 🎯 Phase 6: Reporting Enhancements (TODO)
-
-### Goals
-- Multiple report formats
-- Better visualization
-- Integration with CI/CD
-
-### Planned Features
-
-#### HTML Reports
-- Color-coded severity table
-- Expandable evidence sections
-- Executive summary
-- Remediation timeline
-
-#### PDF Reports
-- Professional formatting
-- Logo/branding support
-- Charts and graphs
-- Executive summary page
-
-#### CI/CD Integration
-- Exit code on critical findings
-- GitHub Actions integration
-- GitLab CI integration
-- Threshold-based pass/fail
-
-#### Diff Reports
-- Compare scan results over time
-- Track vulnerability trends
-- Highlight new vs. fixed issues
 
 ---
 
@@ -251,22 +215,7 @@ Currently: Placeholder detection
 - Impact assessment
 - Automated remediation suggestions
 
----
 
-## 📊 Current Status Summary
-
-| Component | Status | Completeness |
-|-----------|--------|--------------|
-| JavaScript Discovery | ✅ Complete | 100% |
-| SQL Injection Scanner | ✅ Complete | 85% (time-based needs work) |
-| XSS Scanner | ✅ Complete | 95% |
-| CSRF Scanner | ✅ Complete | 100% |
-| Auth Scanner | ✅ Complete | 90% |
-| Headers Scanner | ✅ Complete | 100% |
-| Info Disclosure | ✅ Complete | 95% |
-| Integration | ✅ Complete | 100% |
-| Reporting | ✅ Complete | 80% (JSON only) |
-| Testing | ❌ TODO | 20% (manual only) |
 
 ---
 
@@ -274,42 +223,32 @@ Currently: Placeholder detection
 
 This project demonstrates understanding of:
 
-✅ **Web Security Fundamentals**
+ **Web Security Fundamentals**
 - OWASP Top 10 vulnerabilities
 - Attack surface mapping
 - Security headers & best practices
 
-✅ **Modern Web Technologies**
+ **Modern Web Technologies**
 - JavaScript rendering (Playwright)
 - Async HTTP programming
 - HTML parsing
 
-✅ **Security Testing**
+ **Security Testing**
 - Vulnerability detection techniques
 - False positive reduction
 - Severity assessment
 
-✅ **Software Engineering**
+ **Software Engineering**
 - Modular architecture
 - Type hints & data classes
 - Async/await patterns
 
----
 
-## 🔐 Responsible Disclosure
-
-This tool is for **authorized security testing only**. Always:
-
-1. Get written permission before testing
-2. Respect rate limits and server resources
-3. Report vulnerabilities responsibly
-4. Never test against production without authorization
-5. Follow responsible disclosure policies
-
----
 
 ## 📚 References
 
 - **OWASP Testing Guide**: https://owasp.org/www-project-web-security-testing-guide/
 - **CWE Database**: https://cwe.mitre.org/
 - **PortSwigger Web Security Academy**: https://portswigger.net/web-security
+- **Playwright Docs**: https://playwright.dev/python/
+- **httpx Docs**: https://www.python-httpx.org/
