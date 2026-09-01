@@ -5,7 +5,7 @@ guide-section: "Getting Started"
 
 
 
-**dash-penetration** is an automated web application security scanner for authorized penetration testing. It combines JavaScript rendering with comprehensive vulnerability detection to test modern web applications.
+**dash-penetration** is a web application security scanner for authorized penetration testing. It combines JavaScript rendering with vulnerability detection to test modern web applications.
 
 ---
 
